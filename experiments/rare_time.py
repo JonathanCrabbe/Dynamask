@@ -12,7 +12,7 @@ from statsmodels.tsa.arima_process import ArmaProcess
 explainers = ['dynamask', 'fo', 'fp', 'ig', 'shap']
 
 
-def run_experiment(cv: int = 0, N_ex: int = 1, T: int = 50, N_features: int = 50, N_select: int = 5,
+def run_experiment(cv: int = 0, N_ex: int = 10, T: int = 50, N_features: int = 50, N_select: int = 5,
                    save_dir: str = 'experiments/results/rare_time/'):
     """
     :param cv: Do the experiment with different cv to obtain error bars
