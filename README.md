@@ -9,7 +9,7 @@ a model to issue its prediction when the data is represented in terms of time se
 For more details on the theoretical side, please read our [ICML 2021 paper](): 'Explaining Time Series
 Predictions with Dynamic Masks'.
 
-Part of the experiments in our paper are relying on [FIT](https://github.com/sanatonek/time_series_explainability), 
+Part of the experiments in our paper are relying on [FIT](https://github.com/sanatonek/time_series_explainability),
 another repository associated to the [NeurIPS 2021 paper](https://papers.nips.cc/paper/2020/hash/08fa43588c2571ade19bc0fa5936e028-Abstract.html)
 : 'What went wrong and when? Instance-wise feature importance for time-series black-box models'. We have included all
 the relevant files in the folder [fit](fit).
@@ -28,7 +28,7 @@ When the packages are installed, Dynamask can directly be used.
 
 ## Toy example
 
-It is very easy to fit a mask on a time series model. Bellow, you can find a toy demonstration where we 
+It is very easy to fit a mask on a time series model. Bellow, you can find a toy demonstration where we
 fit a mask to an input time series. In this case, the mask area is fixed to 0.1 (the 10% most important features
 are highlighted by the mask). All the relevant code can be found in the file [mask](attribution/mask.py).
 
@@ -58,7 +58,7 @@ mask.plot_mask()
 ```
 
 If the proportion of features to select is unkown, a good approach is to fit a group of masks
-with different areas. Then, the extremal mask can be extracted from the group. 
+with different areas. Then, the extremal mask can be extracted from the group.
 The relevant code can be found in the file [mask_group](attribution/mask_group.py).
 ```python
 import torch
@@ -81,7 +81,7 @@ X = torch.randn(10, 3).to(device) # The shape of the input has to be (T, N_featu
 areas = [.1, .15, .2, .25] # These are the areas of the different masks
 pert = GaussianBlur(device)
 masks = MaskGroup(pert, device)
-masks.fit(X, black_box, loss_function=mse, area_list=areas, size_reg_factor_init=0.01) 
+masks.fit(X, black_box, loss_function=mse, area_list=areas, size_reg_factor_init=0.01)
 
 # Extract the extremal mask:
 epsilon = 0.01
@@ -94,7 +94,7 @@ mask.plot_mask()
 
 ## Replicate experiments
 
-All experiments in the ICML paper can be replicated easily. The necessary code is in [experiments](experiments). 
+All experiments in the ICML paper can be replicated easily. The necessary code is in [experiments](experiments).
 Bellow , we detail the procedure for each experiment.
 
 ###  Replicate the Rare experiments
@@ -112,8 +112,8 @@ Bellow , we detail the procedure for each experiment.
 2. The results of these experiments are saved in the two following folders: [Rare Feature](experiments/results/rare_feature)
 and [Rare Time](experiments/results/rare_time). To process the results and compute the associated metrics run:
    ```shell
-   python -m experiments.results.rare_feature.get_results 
-   python -m experiments.results.rare_time.get_results 
+   python -m experiments.results.rare_feature.get_results
+   python -m experiments.results.rare_time.get_results
    ```
    The following options need to be specified:
    ```shell
@@ -121,7 +121,7 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
    --CV # The number of runs you have done for the experiment
    --explainers # The baselines you have used among: dynamask, fo, fp, ig, shap (separated by a space)
    ```
-   
+
 
 ###  Replicate the State experiment
 
@@ -146,12 +146,12 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
    python -m experiments.state
    ```
    Please use the same ``--cv`` option as for the previous command.
-   
+
 
 4. The masks are all saved in [this folder](experiments/results/state).
    To process the results and compute the associated metrics run:
    ```shell
-   python -m experiments.results.state.get_results 
+   python -m experiments.results.state.get_results
    ```
    The following options need to be specified:
    ```shell
@@ -163,7 +163,7 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
 ### Replicate the MIMIC experiment
 1. MIMIC-III is a private dataset. For the following, you need to have You need to have the MIMIC-III database running on
    a local server. For more information, please refer to [the official MIMIC-III documentation](https://mimic.mit.edu/iii/gettingstarted/dbsetup/).
-   
+
 
 2. Run this command to process the data and store it:
    ```shell
@@ -210,7 +210,7 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
    ```
    The resulting plots are saved in [this folder](experiments/results/mimic).
 
-## Citing 
+## Citing
 
 If you use this code, please cite the associated paper:
 
