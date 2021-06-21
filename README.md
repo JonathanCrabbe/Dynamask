@@ -6,7 +6,7 @@ Code Author: Jonathan Crabbé ([jc2133@cam.ac.uk](mailto:jc2133@cam.ac.uk))
 
 This repository contains the implementation of Dynamask, a method to identify the features that are salient for
 a model to issue its prediction when the data is represented in terms of time series.
-For more details on the theoretical side, please read our [ICML 2021 paper](): 'Explaining Time Series
+For more details on the theoretical side, please read our [ICML 2021 paper](https://arxiv.org/abs/2106.05303): 'Explaining Time Series
 Predictions with Dynamic Masks'.
 
 Part of the experiments in our paper are relying on [FIT](https://github.com/sanatonek/time_series_explainability),
