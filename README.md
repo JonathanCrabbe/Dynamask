@@ -125,7 +125,7 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
 
 ###  Replicate the State experiment
 
-1. Run this command to generate the synthetic data and store it in [this folder](data/state):
+1. Run this command to generate the synthetic data and store it in ``data/state``:
    ```shell
    python -m fit.data_generator.state_data --signal_len 200 --signal_num 1000
    ```
@@ -169,7 +169,7 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
    ```shell
    python data_generator/icu_mortality.py --sqluser YOUR_USER --sqlpass YOUR_PASSWORD
    ```
-   If everything happens properly, a file ``patient_vital_preprocessed.pkl`` is stored in [this folder](data/mimic)
+   If everything happens properly, a file ``patient_vital_preprocessed.pkl`` is stored in ``data/mimic``
 
 
 3. Run the following command to fit a model together with a baseline saliency method:
