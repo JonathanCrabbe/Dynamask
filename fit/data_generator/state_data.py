@@ -180,7 +180,7 @@ def create_dataset(count, signal_len):
     save_dir = './data/state/'
     if not os.path.exists(save_dir):
         print(f'Creating saving directory {save_dir}.')
-        os.makedirs('./data/simulated_data')
+        os.makedirs(save_dir)
     print(f'Saving data in {save_dir}.')
     with open(os.path.join(save_dir, 'state_dataset_x_train.pkl'), 'wb') as f:
         pickle.dump(train_data_n, f)
