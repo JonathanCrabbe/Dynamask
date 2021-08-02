@@ -165,14 +165,21 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
    a local server. For more information, please refer to [the official MIMIC-III documentation](https://mimic.mit.edu/iii/gettingstarted/dbsetup/).
 
 
-2. Run this command to process the data and store it:
+2. Run this command to acquire the data and store it:
    ```shell
-   python data_generator/icu_mortality.py --sqluser YOUR_USER --sqlpass YOUR_PASSWORD
+   python fit/data_generator/icu_mortality.py --sqluser YOUR_USER --sqlpass YOUR_PASSWORD
    ```
-   If everything happens properly, a file ``patient_vital_preprocessed.pkl`` is stored in ``data/mimic``
+   If everything happens properly, two files named ``adult_icu_vital.gz`` and ``adult_icu_lab.gz`` 
+   are stored in ``data/mimic``.
+   
 
+3. Run this command to preprocess the data: 
+   ```shell
+   python fit/data_generator/data_preprocess.py
+   ```
+   If everything happens properly, a file ``patient_vital_preprocessed.pkl`` is stored in ``data/mimic``. 
 
-3. Run the following command to fit a model together with a baseline saliency method:
+4. Run the following command to fit a model together with a baseline saliency method:
    ```shell
    python -m fit.evaluation.baselines --data mimic --explainer fit --train   
    ```
@@ -184,7 +191,7 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
    --cv # An integer that sets the random seed (first run cv=0 , second run cv=1, ...)
    ```
 
-4. The models and baselines saliency maps are all saved in [this folder](experiments/results/state).
+5. The models and baselines saliency maps are all saved in [this folder](experiments/results/state).
    Now fit a mask for each of these time series by running:
    ```shell
    python -m experiments.mimic
@@ -196,7 +203,7 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
    --area # The area of the mask to fit (a number between 0 and 1)
    ```
 
-5. The masks are all saved in [this folder](experiments/results/mimic).
+6. The masks are all saved in [this folder](experiments/results/mimic).
    To process the results and compute the associated metrics run:
    ```shell
    python -m experiments.results.state.plot_benchmarks
