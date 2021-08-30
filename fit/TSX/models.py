@@ -426,7 +426,6 @@ class StateClassifier(nn.Module):
                                        nn.ReLU(),
                                        nn.Dropout(0.5),
                                        nn.Linear(self.hidden_size, self.n_state))
-                                       # nn.Softmax(-1))
 
     def forward(self, input, past_state=None, **kwargs):
         input = input.permute(2, 0, 1).to(self.device)

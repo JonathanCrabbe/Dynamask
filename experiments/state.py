@@ -6,7 +6,7 @@ from sklearn import metrics
 from torch.nn import Softmax
 from attribution.mask_group import MaskGroup
 from attribution.perturbation import GaussianBlur
-from utils.losses import log_loss
+from utils.losses import log_loss, mse, cross_entropy
 from models.models import StateClassifier
 
 
@@ -53,12 +53,13 @@ def run_experiment(cv: int = 0):
         x = x.unsqueeze(0)
         x = x.transpose(1, 2)
         out = model(x)
-        out = out.reshape(T, -1)
-        out = softmax(out)
+        # out = out.reshape(T, -1)
+        # out = out.transpose(1, 0)
+        # out = softmax(out)
         return out
 
     # Prepare the useful variables:
-    pert = GaussianBlur(device, sigma_max=1.0)  # This is the perturbation operator
+    pert = GaussianBlur(device, sigma_max=1)  # This is the perturbation operator
     area_list = np.arange(0.25, 0.35, 0.01)  # This is the list of masks area to consider
     mask_saliency = torch.zeros(size=(N_ex, T, N_features), dtype=torch.float32,
                                 device=device)  # This is Dynamask's approximation for true_saliency
@@ -67,21 +68,19 @@ def run_experiment(cv: int = 0):
         print(f'Now working with sample {k + 1}/{N_ex}.')
         # Fit the group of mask:
         mask_group = MaskGroup(pert, device, verbose=False, deletion_mode=False)
-        mask_group.fit(X=x_test, f=f, loss_function=log_loss, area_list=area_list,
+        mask_group.fit(X=x_test, f=f, loss_function=mse, area_list=area_list,
                        learning_rate=1.0, size_reg_factor_init=0.1, size_reg_factor_dilation=100,
-                       initial_mask_coeff=0.5, n_epoch=1000, momentum=1.0, time_reg_factor=1.0)
-
-        # Extract the extremal mask:
-        thresh = log_loss(f(x_test), f(x_test))  # This is what we call epsilon in the paper
-        mask = mask_group.get_extremal_mask(threshold=thresh)
+                       initial_mask_coeff=0.5, n_epoch=1500, momentum=0.9, time_reg_factor=1.0)
+        # Extract the best mask:
+        mask = mask_group.get_best_mask()
         mask_saliency[k, :, :] = mask.mask_tensor
 
         # Compute the metrics:
-        prec, rec, thres = metrics.precision_recall_curve(true_saliency[k, :, :].flatten().astype(int),
-                                                          mask.mask_tensor.clone().detach().cpu().numpy().flatten())
-        print(f'For this iteration: AUP={metrics.auc(thres, prec[:-1]):.3g} ; AUR={metrics.auc(thres, rec[:-1]):.3g} ; '
-              f'AUROC={metrics.roc_auc_score(true_saliency[k, :, :].flatten().astype(int), mask.mask_tensor.clone().detach().cpu().numpy().flatten()):.3g} ; '
-              f'AUPRC={metrics.average_precision_score(true_saliency[k, :, :].flatten().astype(int), mask.mask_tensor.clone().detach().cpu().numpy().flatten()):.3g}\n'
+        prec, rec, thres = metrics.precision_recall_curve(true_saliency[:k+1, :, :].flatten().astype(int),
+                                                          mask_saliency[:k+1, :, :].cpu().numpy().flatten())
+        print(f'Until this iteration: AUP={metrics.auc(thres, prec[:-1]):.3g} ; AUR={metrics.auc(thres, rec[:-1]):.3g} ; '
+              f'AUROC={metrics.roc_auc_score(true_saliency[:k+1, :, :].flatten().astype(int), mask_saliency[:k+1, :, :].cpu().numpy().flatten()):.3g} ; '
+              f'AUPRC={metrics.average_precision_score(true_saliency[:k+1, :, :].flatten().astype(int), mask_saliency[:k+1, :, :].cpu().numpy().flatten()):.3g}\n'
               + 100 * '=')
 
     # Save the mask saliency map and print the metrics:
