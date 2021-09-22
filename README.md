@@ -24,6 +24,8 @@ To install the relevant packages from shell:
     ```shell
     pip install -r requirements.txt #install requirements
     ```
+    * If at this point you experience problems installing `psycopg2`, try `psycopg2-binary` (see comment in `requirements.txt`). Note also the dependencies for `psycopg2` installation here: https://www.psycopg.org/install/.
+
 When the packages are installed, Dynamask can directly be used.
 
 ## Toy example
