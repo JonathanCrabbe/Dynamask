@@ -133,3 +133,6 @@ data/mimic/*
 data/state/*
 experiments/results/*
 .idea
+.vscode
+.flake8
+.pylint
