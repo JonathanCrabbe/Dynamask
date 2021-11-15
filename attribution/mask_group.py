@@ -11,33 +11,23 @@ from attribution.perturbation import Perturbation
 
 
 class MaskGroup:
-    """
-    This class allows to fit several mask of different areas simultaneously
+    """This class allows to fit several mask of different areas simultaneously.
 
-    perturbation : attribution.perturbation.Perturbation
-        an object of the Perturbation class that uses the mask to generate perturbations
-    device :
-        the device used to work with the torch tensors
-    verbose : bool
-        True is some messages should be displayed during optimization
-    random_seed : int
-        random seed for reproducibility
-    deletion_mode : bool
-        True if the mask should identify the most impactful deletions
-    eps : float
-        small number used for numerical stability
-    masks_tensor : torch.tensor
-        the tensor containing the coefficient of each mask (its size is len(area_list) * T * N_features)
-    T : int
-        number of time steps
-    N_features : int
-        number of features
-    Y_target : torch.tensor
-        black-box prediction
-    hist : torch.tensor
-        history tensor containing the metrics at different epochs
-    task : str
-        classification or regression
+    Attributes:
+        perturbation (attribution.perturbation.Perturbation):
+            An object of the Perturbation class that uses the mask to generate perturbations.
+        device: The device used to work with the torch tensors.
+        verbose (bool): True is some messages should be displayed during optimization.
+        random_seed (int): Random seed for reproducibility.
+        deletion_mode (bool): True if the mask should identify the most impactful deletions.
+        eps (float): Small number used for numerical stability.
+        masks_tensor (torch.tensor): The tensor containing the coefficient of each mask
+            (its size is len(area_list) * T * N_features).
+        T (int): Number of time steps.
+        N_features (int): Number of features.
+        Y_target (torch.tensor): Black-box prediction.
+        hist (torch.tensor): History tensor containing the metrics at different epochs.
+        task (str): "classification" or "regression".
     """
 
     def __init__(
@@ -78,19 +68,24 @@ class MaskGroup:
         momentum: float = 0.9,
         time_reg_factor: float = 0,
     ):
-        """
-        This method fits a group of masks to the input X for the black-box function f.
-        :param X: input matrix (as a T*N_features torch tensor)
-        :param f: black-box (as a map compatible with torch tensors)
-        :param area_list: the list of areas (a) of the masks we want to fit
-        :param loss_function: the loss function to optimize
-        :param n_epoch: number of steps for the optimization
-        :param initial_mask_coeff: initial value for the mask coefficient (called lambda_0 in the paper)
-        :param size_reg_factor_init: initial coefficient for the regulator part of the total loss
-        :param size_reg_factor_dilation: ratio between the final and the initial size regulation factor (called delta in the paper)
-        :param time_reg_factor: regulation factor for the variation in time (called lambda_a in the paper)
-        :param learning_rate: learning rate for the torch SGD optimizer
-        :param momentum: momentum for the SGD optimizer
+        """This method fits a group of masks to the input X for the black-box function f.
+
+        Args:
+            X: Input matrix (as a T*N_features torch tensor).
+            f: Black-box (as a map compatible with torch tensors).
+            area_list: The list of areas (a) of the masks we want to fit.
+            loss_function: The loss function to optimize.
+            n_epoch: Number of steps for the optimization.
+            initial_mask_coeff: Initial value for the mask coefficient (called lambda_0 in the paper).
+            size_reg_factor_init: Initial coefficient for the regulator part of the total loss.
+            size_reg_factor_dilation: Ratio between the final and the initial size regulation factor
+                (called delta in the paper).
+            time_reg_factor: Regulation factor for the variation in time (called lambda_a in the paper).
+            learning_rate: Learning rate for the torch SGD optimizer.
+            momentum: Momentum for the SGD optimizer.
+
+        Returns:
+            None
         """
         # Ensure that the area list is sorted
         area_list.sort()
@@ -183,9 +178,7 @@ class MaskGroup:
         self.mask_list = mask_list
 
     def get_best_mask(self):
-        """
-        This method returns the mask with lowest error
-        """
+        """This method returns the mask with lowest error."""
         error_list = [mask.get_error() for mask in self.mask_list]
         best_index = error_list.index(min(error_list))
         print(
@@ -195,9 +188,7 @@ class MaskGroup:
         return self.mask_list[best_index]
 
     def get_extremal_mask(self, threshold):
-        """
-        This method returns the extremal mask for the acceptable error threshold (called epsilon in the paper)
-        """
+        """This method returns the extremal mask for the acceptable error threshold (called epsilon in the paper)."""
         error_list = [mask.get_error() for mask in self.mask_list]
         # If the minimal error is above the threshold, the best we can do is select the mask with lowest error
         if min(error_list) > threshold:
@@ -212,9 +203,7 @@ class MaskGroup:
                     return self.mask_list[id_mask]
 
     def plot_errors(self):
-        """
-        This method plots the error as a function of the mask size
-        """
+        """This method plots the error as a function of the mask size."""
         sns.set()
         error_list = [mask.get_error() for mask in self.mask_list]
         plt.plot(self.area_list, error_list)

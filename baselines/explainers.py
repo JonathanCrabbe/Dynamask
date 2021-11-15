@@ -1,3 +1,12 @@
+"""Most of the bellow baselines rely on their captum implementation.
+
+For more information, please check https://github.com/pytorch/captum
+
+Note that these implementations are mainly used in the rate time and feature experiment.
+For the state and mimic experiment, we use the results produced by FIT.
+For more details on the FIT implementations, please check https://github.com/sanatonek/time_series_explainability
+"""
+
 import torch
 from captum.attr import (
     FeaturePermutation,
@@ -8,14 +17,6 @@ from captum.attr import (
 )
 
 from utils.tensor_manipulation import normalize as normal
-
-"""
-Most of the bellow baselines rely on their captum implementation.
-For more information, please check https://github.com/pytorch/captum .
-Note that these implementations are mainly used in the rate time and feature experiment.
-For the state and mimic experiment, we use the results produced by FIT.
-For more details on the FIT implementations, please check https://github.com/sanatonek/time_series_explainability
-"""
 
 # Perturbation methods:
 

@@ -13,33 +13,22 @@ from utils.metrics import get_entropy, get_information
 
 
 class Mask:
-    """
-    This class allows to fit and interact with dynamic masks.
+    """This class allows to fit and interact with dynamic masks.
 
-    perturbation : attribution.perturbation.Perturbation
-        an object of the Perturbation class that uses the mask to generate perturbations
-    device :
-        the device used to work with the torch tensors
-    verbose : bool
-        True is some messages should be displayed during optimization
-    random_seed : int
-        random seed for reproducibility
-    deletion_mode : bool
-        True if the mask should identify the most impactful deletions
-    eps : float
-        small number used for numerical stability
-    mask_tensor : torch.tensor
-        the tensor containing the mask coefficients
-    T : int
-        number of time steps
-    N_features : int
-        number of features
-    Y_target : torch.tensor
-        black-box prediction
-    hist : torch.tensor
-        history tensor containing the metrics at different epochs
-    task : str
-        classification or regression
+    Attributes:
+        perturbation (attribution.perturbation.Perturbation):
+            An object of the Perturbation class that uses the mask to generate perturbations.
+        device: The device used to work with the torch tensors.
+        verbose (bool): True is some messages should be displayed during optimization.
+        random_seed (int): Random seed for reproducibility.
+        deletion_mode (bool): True if the mask should identify the most impactful deletions.
+        eps (float): Small number used for numerical stability.
+        mask_tensor (torch.tensor): The tensor containing the mask coefficients.
+        T (int): Number of time steps.
+        N_features (int): Number of features.
+        Y_target (torch.tensor): Black-box prediction.
+        hist (torch.tensor): History tensor containing the metrics at different epochs.
+        task (str): "classification" or "regression".
     """
 
     def __init__(
@@ -87,20 +76,25 @@ class Mask:
         learning_rate: float = 1.0e-1,
         momentum: float = 0.9,
     ):
-        """
-        This method fits a mask to the input X for the black-box function f.
-        :param X: input matrix (as a T*N_features torch tensor)
-        :param f: black-box (as a map compatible with torch tensors)
-        :param loss_function: the loss function to optimize
-        :param target: if the output to approximate is different from f(X), it can be specified optionally
-        :param n_epoch: number of steps for the optimization
-        :param keep_ratio: fraction of elements in X that should be kept by the mask (called a in the paper)
-        :param initial_mask_coeff: initial value for the mask coefficient (called lambda_0 in the paper)
-        :param size_reg_factor_init: initial coefficient for the regulator part of the total loss
-        :param size_reg_factor_dilation: ratio between the final and the initial size regulation factor (called delta in the paper)
-        :param time_reg_factor: regulation factor for the variation in time (called lambda_a in the paper)
-        :param learning_rate: learning rate for the torch SGD optimizer
-        :param momentum: momentum for the SGD optimizer
+        """This method fits a mask to the input X for the black-box function f.
+
+        Args:
+            X: Input matrix (as a T*N_features torch tensor).
+            f: Black-box (as a map compatible with torch tensors).
+            loss_function: The loss function to optimize.
+            target: If the output to approximate is different from f(X), it can be specified optionally.
+            n_epoch: Number of steps for the optimization.
+            keep_ratio: Fraction of elements in X that should be kept by the mask (called a in the paper).
+            initial_mask_coeff: Initial value for the mask coefficient (called lambda_0 in the paper).
+            size_reg_factor_init: Initial coefficient for the regulator part of the total loss.
+            size_reg_factor_dilation: Ratio between the final and the initial size regulation factor
+                (called delta in the paper).
+            time_reg_factor: Regulation factor for the variation in time (called lambda_a in the paper).
+            learning_rate: Learning rate for the torch SGD optimizer.
+            momentum: Momentum for the SGD optimizer.
+
+        Returns:
+            None
         """
         # Initialize the random seed and the attributes
         t_fit = time.time()
@@ -178,10 +172,13 @@ class Mask:
     # Mask Manipulation
 
     def get_smooth_mask(self, sigma=1):
-        """
-        This method smooths the mask tensor by applying a temporal Gaussian filter for each feature.
-        :param sigma: width of the Gaussian filter
-        :return: the smoothed mask (as a torch tensor)
+        """This method smooths the mask tensor by applying a temporal Gaussian filter for each feature.
+
+        Args:
+            sigma: Width of the Gaussian filter.
+
+        Returns:
+            torch.Tensor: The smoothed mask.
         """
         # Define the Gaussian smoothing kernel
         T_axis = torch.arange(1, self.T + 1, dtype=int, device=self.device)
@@ -195,12 +192,15 @@ class Mask:
         return mask_tensor_smooth
 
     def extract_submask(self, mask_tensor, ids_time, ids_feature):
-        """
-        This method extracts a submask specified with specified indices
-        :param mask_tensor: the tensor from which data should be extracted
-        :param ids_time: list of the times that should be extracted
-        :param ids_feature: list of the features that should be extracted
-        :return: submask (as a torch tensor) extracted based on the indices
+        """This method extracts a submask specified with specified indices.
+
+        Args:
+            mask_tensor: The tensor from which data should be extracted.
+            ids_time: List of the times that should be extracted.
+            ids_feature: List of the features that should be extracted.
+
+        Returns:
+            torch.Tensor: Submask extracted based on the indices.
         """
         # If no identifiers have been specified, we use the whole data
         if ids_time is None:
@@ -216,12 +216,16 @@ class Mask:
     # Mask plots
 
     def plot_mask(self, ids_time=None, ids_feature=None, smooth: bool = False, sigma: float = 1.0):
-        """
-        This method plots (part of) the mask.
-        :param ids_time: list of the times that should appear on the plot
-        :param ids_feature: list of the features that should appear on the plot
-        :param smooth: True if the mask should be smoothed before plotting
-        :param sigma: width of the smoothing Gaussian kernel
+        """This method plots (part of) the mask.
+
+        Args:
+            ids_time: List of the times that should appear on the plot.
+            ids_feature: List of the features that should appear on the plot.
+            smooth: True if the mask should be smoothed before plotting.
+            sigma: Width of the smoothing Gaussian kernel.
+
+        Returns:
+            None
         """
         sns.set()
         # Smooth the mask if required
@@ -241,9 +245,7 @@ class Mask:
         plt.show()
 
     def plot_hist(self):
-        """
-        This method plots the metrics for different epochs of optimization.
-        """
+        """This method plots the metrics for different epochs of optimization."""
         if self.hist is None:
             raise RuntimeError("The mask should be optimized before plotting the metrics.")
         sns.set()
@@ -263,33 +265,40 @@ class Mask:
     # Mask metrics
 
     def get_information(self, ids_time=None, ids_feature=None, normalize: bool = False):
-        """
-        This methods returns the mask information contained in the identifiers.
-        :param normalize:
-        :param ids_time: list of the times that should contribute
-        :param ids_feature: list of the features that should contribute
-        :return: information content as a torch scalar
+        """This methods returns the mask information contained in the identifiers.
+
+        Args:
+            normalize: Whether to normalize.
+            ids_time: List of the times that should contribute.
+            ids_feature: List of the features that should contribute.
+
+        Returns:
+            Information content as a torch scalar.
         """
         return get_information(
             self.mask_tensor, ids_time=ids_time, ids_feature=ids_feature, normalize=normalize, eps=self.eps
         )
 
     def get_entropy(self, ids_time=None, ids_feature=None, normalize: bool = False):
-        """
-        This methods returns the mask entropy contained in the identifiers.
-        :param normalize:
-        :param ids_time: list of the times that should contribute
-        :param ids_feature: list of the features that should contribute
-        :return: entropy as a torch scalar
+        """This methods returns the mask entropy contained in the identifiers.
+
+        Args:
+            normalize: Whether to normalize.
+            ids_time: List of the times that should contribute.
+            ids_feature: List of the features that should contribute.
+
+        Returns:
+            Entropy as a torch scalar.
         """
         return get_entropy(
             self.mask_tensor, ids_time=ids_time, ids_feature=ids_feature, normalize=normalize, eps=self.eps
         )
 
     def get_error(self):
-        """
-        This methods returns the error between the unperturbed and perturbed input [L_e]
-        :return: error as a torch scalar
+        """This methods returns the error between the unperturbed and perturbed input [L_e].
+
+        Returns:
+            Error as a torch scalar.
         """
         if self.deletion_mode:
             X_pert = self.perturbation.apply(X=self.X, mask_tensor=1 - self.mask_tensor)

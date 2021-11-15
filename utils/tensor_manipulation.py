@@ -8,12 +8,15 @@ def normalize(tensor, eps=1.0e-7):
 
 
 def extract_subtensor(tensor: torch.Tensor, ids_time, ids_feature):
-    """
-        This method extracts a subtensor specified with the indices
-        :param tensor: the (T, N_features) tensor from which the data should be extracted
-        :param ids_time: list of the times that should be extracted
-        :param ids_feature: list of the features that should be extracted
-        :return: submask (as a torch tensor) extracted based on the indices
+    """This method extracts a subtensor specified with the indices.
+
+    Args:
+        tensor: The (T, N_features) tensor from which the data should be extracted.
+        ids_time: List of the times that should be extracted.
+        ids_feature: List of the features that should be extracted.
+
+    Returns:
+        torch.Tensor: Submask extracted based on the indices.
     """
     T, N_features = tensor.shape
     # If no identifiers have been specified, we use the whole data

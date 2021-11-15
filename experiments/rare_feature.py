@@ -22,16 +22,19 @@ def run_experiment(
     N_select: int = 5,
     save_dir: str = "experiments/results/rare_feature/",
 ):
-    """
-    :param cv: Do the experiment with different cv to obtain error bars
-    :param N_ex: Number of time series to generate
-    :param T: Length of each time series
-    :param N_features: Number of features in each time series
-    :param N_select: Number of features that are truly salient
-    :param save_dir: Directory where the results should be saved
-    :return:
-    """
+    """Run experiment.
 
+    Args:
+        cv: Do the experiment with different cv to obtain error bars.
+        N_ex: Number of time series to generate.
+        T: Length of each time series.
+        N_features: Number of features in each time series.
+        N_select: Number of features that are truly salient.
+        save_dir: Directory where the results should be saved.
+
+    Returns:
+        None
+    """
     # Create the saving directory if it does not exist
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)

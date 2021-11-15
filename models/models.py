@@ -1,5 +1,5 @@
-"""
-This code is reproduced from https://github.com/sanatonek/time_series_explainability/blob/master/TSX/models.py .
+"""This code is reproduced from https://github.com/sanatonek/time_series_explainability/blob/master/TSX/models.py.
+
 It is used to reproduce the state and mimic experiments form the original paper faithfully.
 Please refer to the original the above repository for more details.
 """
@@ -37,12 +37,13 @@ len_of_stay = 48
 
 
 class PatientData:
-    """Dataset of patient vitals, demographics and lab results
-    Args:
-        root: Root directory of the pickled dataset
-        train_ratio: train/test ratio
-        shuffle: Shuffle dataset before separating train/test
-        transform: Preprocessing transformation on the dataset
+    """Dataset of patient vitals, demographics and lab results.
+
+    Attributes:
+        root: Root directory of the pickled dataset.
+        train_ratio: train/test ratio.
+        shuffle: Shuffle dataset before separating train/test.
+        transform: Preprocessing transformation on the dataset.
     """
 
     def __init__(
@@ -125,7 +126,7 @@ class PatientData:
         return len(self.data)
 
     def __preprocess_predict_int__(self):
-        "This replicates preprocessing of suresh et al for intervention prediction"
+        """This replicates preprocessing of suresh et al for intervention prediction."""
         X_orig = np.array([x for (x, y, z) in self.data])
         y_orig = self.intervention
         z_orig = np.array([z for (x, y, z) in self.data])
@@ -166,8 +167,7 @@ class PatientData:
         return X, y, z
 
     def normalize(self):  # TODO: Have multiple normalization option or possibly take in a function for the transform
-        """ Calculate the mean and std of each feature from the training set
-        """
+        """Calculate the mean and std of each feature from the training set."""
         d = [x.T for x in self.train_data]
         d = np.stack(d, axis=0)
         self.feature_max = np.tile(np.max(d.reshape(-1, self.feature_size), axis=0), (self.len_of_stay, 1)).T
@@ -191,81 +191,77 @@ class PatientData:
         # self.test_data = np.array([ np.where(self.feature_min==self.feature_max,(x-self.feature_min),(x-self.feature_min)/(self.feature_max-self.feature_min) ) for x in self.test_data])
 
 
-'''
+# class PatientData():
+#     """Dataset of patient vitals, demographics and lab results
+#     Args:
+#         root: Root directory of the pickled dataset
+#         train_ratio: train/test ratio
+#         shuffle: Shuffle dataset before separating train/test
+#         transform: Preprocessing transformation on the dataset
+#     """
 
-class PatientData():
-    """Dataset of patient vitals, demographics and lab results
-    Args:
-        root: Root directory of the pickled dataset
-        train_ratio: train/test ratio
-        shuffle: Shuffle dataset before separating train/test
-        transform: Preprocessing transformation on the dataset
-    """
+#     def __init__(self, root, train_ratio=0.8, shuffle=False, random_seed='1234', transform="normalize",task='mortality'):
+#         self.data_dir = os.path.join(root, 'patient_vital_preprocessed.pkl')
+#         self.train_ratio = train_ratio
+#         self.random_seed = random.seed(random_seed)
+#         self.pos_weight=[1,1]
 
-    def __init__(self, root, train_ratio=0.8, shuffle=False, random_seed='1234', transform="normalize",task='mortality'):
-        self.data_dir = os.path.join(root, 'patient_vital_preprocessed.pkl')
-        self.train_ratio = train_ratio
-        self.random_seed = random.seed(random_seed)
-        self.pos_weight=[1,1]
+#         if not os.path.exists(self.data_dir):
+#             raise RuntimeError('Dataset not found')
+#         with open(self.data_dir, 'rb') as f:
+#             self.data = pickle.load(f)
+#         if os.path.exists(os.path.join(root,'patient_interventions.pkl')):
+#             with open(os.path.join(root,'patient_interventions.pkl'), 'rb') as f:
+#                 self.intervention = pickle.load(f)
+#             self.n_train = int(0.8*len(self.intervention))
+#             self.train_intervention = self.intervention[0:self.n_train,:,:]
+#             self.test_intervention = self.intervention[self.n_train:,:,:]
+#         if shuffle:
+#             inds = np.arange(len(self.data))
+#             random.shuffle(inds)
+#             self.data = self.data[inds]
+#             self.intervention = self.intervention[inds,:,:]
+#         self.feature_size = len(self.data[0][0])
+#         self.n_train = int(len(self.data) * self.train_ratio)
+#         self.n_test = len(self.data) - self.n_train
+#         self.train_data = np.array([x for (x, y, z) in self.data[0:self.n_train]])
+#         self.test_data = np.array([x for (x, y, z) in self.data[self.n_train:]])
+#         self.train_label = np.array([y for (x, y, z) in self.data[0:self.n_train]])
+#         self.test_label = np.array([y for (x, y, z) in self.data[self.n_train:]])
+#         self.train_missing = np.array([np.mean(z) for (x, y, z) in self.data[0:self.n_train]])
+#         self.test_missing = np.array([np.mean(z) for (x, y, z) in self.data[self.n_train:]])
+#         if transform == "normalize":
+#             self.normalize()
 
-        if not os.path.exists(self.data_dir):
-            raise RuntimeError('Dataset not found')
-        with open(self.data_dir, 'rb') as f:
-            self.data = pickle.load(f)
-        if os.path.exists(os.path.join(root,'patient_interventions.pkl')):
-            with open(os.path.join(root,'patient_interventions.pkl'), 'rb') as f:
-                self.intervention = pickle.load(f)
-            self.n_train = int(0.8*len(self.intervention))
-            self.train_intervention = self.intervention[0:self.n_train,:,:]
-            self.test_intervention = self.intervention[self.n_train:,:,:]
-        if shuffle:
-            inds = np.arange(len(self.data))
-            random.shuffle(inds)
-            self.data = self.data[inds]
-            self.intervention = self.intervention[inds,:,:]
-        self.feature_size = len(self.data[0][0])
-        self.n_train = int(len(self.data) * self.train_ratio)
-        self.n_test = len(self.data) - self.n_train
-        self.train_data = np.array([x for (x, y, z) in self.data[0:self.n_train]])
-        self.test_data = np.array([x for (x, y, z) in self.data[self.n_train:]])
-        self.train_label = np.array([y for (x, y, z) in self.data[0:self.n_train]])
-        self.test_label = np.array([y for (x, y, z) in self.data[self.n_train:]])
-        self.train_missing = np.array([np.mean(z) for (x, y, z) in self.data[0:self.n_train]])
-        self.test_missing = np.array([np.mean(z) for (x, y, z) in self.data[self.n_train:]])
-        if transform == "normalize":
-            self.normalize()
+#     def __getitem__(self, index):
+#         signals, target = self.data[index]
+#         return signals, target
 
-    def __getitem__(self, index):
-        signals, target = self.data[index]
-        return signals, target
+#     def __len__(self):
+#         return len(self.data)
 
-    def __len__(self):
-        return len(self.data)
-
-    def normalize(self): # TODO: Have multiple normalization option or possibly take in a function for the transform
-        """ Calculate the mean and std of each feature from the training set
-        """
-        d = [x.T for x in self.train_data]
-        d = np.stack(d, axis=0)
-        self.feature_max = np.tile(np.max(d.reshape(-1, self.feature_size), axis=0), (len_of_stay, 1)).T
-        self.feature_min = np.tile(np.min(d.reshape(-1, self.feature_size), axis=0), (len_of_stay, 1)).T
-        self.feature_means = np.tile(np.mean(d.reshape(-1, self.feature_size), axis=0), (len_of_stay, 1)).T
-        self.feature_std = np.tile(np.std(d.reshape(-1, self.feature_size), axis=0), (len_of_stay, 1)).T
-        np.seterr(divide='ignore', invalid='ignore')
-        self.train_data = np.array(
-           [np.where(self.feature_std == 0, (x - self.feature_means), (x - self.feature_means) / self.feature_std) for
-            x in self.train_data])
-        self.test_data = np.array(
-           [np.where(self.feature_std == 0, (x - self.feature_means), (x - self.feature_means) / self.feature_std) for
-            x in self.test_data])
-        # self.train_data = np.array([ np.where(self.feature_min==self.feature_max,(x-self.feature_min),(x-self.feature_min)/(self.feature_max-self.feature_min) ) for x in self.train_data])
-        # self.test_data = np.array([ np.where(self.feature_min==self.feature_max,(x-self.feature_min),(x-self.feature_min)/(self.feature_max-self.feature_min) ) for x in self.test_data])
-'''
+#     def normalize(self): # TODO: Have multiple normalization option or possibly take in a function for the transform
+#         """ Calculate the mean and std of each feature from the training set
+#         """
+#         d = [x.T for x in self.train_data]
+#         d = np.stack(d, axis=0)
+#         self.feature_max = np.tile(np.max(d.reshape(-1, self.feature_size), axis=0), (len_of_stay, 1)).T
+#         self.feature_min = np.tile(np.min(d.reshape(-1, self.feature_size), axis=0), (len_of_stay, 1)).T
+#         self.feature_means = np.tile(np.mean(d.reshape(-1, self.feature_size), axis=0), (len_of_stay, 1)).T
+#         self.feature_std = np.tile(np.std(d.reshape(-1, self.feature_size), axis=0), (len_of_stay, 1)).T
+#         np.seterr(divide='ignore', invalid='ignore')
+#         self.train_data = np.array(
+#            [np.where(self.feature_std == 0, (x - self.feature_means), (x - self.feature_means) / self.feature_std) for
+#             x in self.train_data])
+#         self.test_data = np.array(
+#            [np.where(self.feature_std == 0, (x - self.feature_means), (x - self.feature_means) / self.feature_std) for
+#             x in self.test_data])
+#         # self.train_data = np.array([ np.where(self.feature_min==self.feature_max,(x-self.feature_min),(x-self.feature_min)/(self.feature_max-self.feature_min) ) for x in self.train_data])
+#         # self.test_data = np.array([ np.where(self.feature_min==self.feature_max,(x-self.feature_min),(x-self.feature_min)/(self.feature_max-self.feature_min) ) for x in self.test_data])
 
 
 class NormalPatientData(PatientData):
-    """ Data class for the generator model that only includes patients who survived in the ICU
-    """
+    """Data class for the generator model that only includes patients who survived in the ICU."""
 
     def __init__(self, root, train_ratio=0.8, shuffle=True, random_seed="1234", transform="normalize"):
         self.data_dir = os.path.join(root, "patient_vital_preprocessed.pkl")
@@ -297,11 +293,12 @@ class NormalPatientData(PatientData):
 
 
 class GHGData:
-    """Dataset of GHG time series
-    Args:
-        root: Root directory of dataset the pickled dataset
-        train_ratio: train/test ratio
-        shuffle: Shuffle dataset before separating train/test
+    """Dataset of GHG time series.
+
+    Attributes:
+        root: Root directory of dataset the pickled dataset.
+        train_ratio: train/test ratio.
+        shuffle: Shuffle dataset before separating train/test.
     """
 
     def __init__(self, root, train_ratio=0.8, shuffle=True, random_seed="1234", transform=None):
@@ -342,8 +339,7 @@ class GHGData:
         return len(self.data)
 
     def normalize(self):
-        """ Calculate the mean and std of each feature from the training set
-        """
+        """Calculate the mean and std of each feature from the training set."""
         d = [x.T for x in self.train_data]
         d = np.stack(d, axis=0)
         self.feature_max = np.tile(np.max(d.reshape(-1, self.feature_size), axis=0), (len_of_stay, 1)).T
@@ -696,9 +692,7 @@ class RiskPredictor(nn.Module):
         self.net = nn.Sequential(nn.Linear(self.encoding_size, 500), nn.ReLU(True), nn.Dropout(0.5), nn.Linear(500, 1))
 
     def temperature_scale(self, logits):
-        """
-        Perform temperature scaling on logits
-        """
+        """Perform temperature scaling on logits."""
         # Expand temperature to match the size of logits
         temperature = self.temperature.unsqueeze(1).expand(logits.size(0), logits.size(1))
         return logits / temperature
