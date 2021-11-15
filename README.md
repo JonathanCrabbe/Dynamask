@@ -10,8 +10,8 @@ For more details on the theoretical side, please read our [ICML 2021 paper](http
 Predictions with Dynamic Masks'.
 
 Part of the experiments in our paper are relying on [FIT](https://github.com/sanatonek/time_series_explainability),
-another repository associated to the [NeurIPS 2021 paper](https://papers.nips.cc/paper/2020/hash/08fa43588c2571ade19bc0fa5936e028-Abstract.html)
-: 'What went wrong and when? Instance-wise feature importance for time-series black-box models'. We have included all
+another repository associated to the [NeurIPS 2021 paper](https://papers.nips.cc/paper/2020/hash/08fa43588c2571ade19bc0fa5936e028-Abstract.html): 
+'What went wrong and when? Instance-wise feature importance for time-series black-box models'. We have included all
 the relevant files in the folder [fit](fit).
 
 ## Installation
@@ -99,6 +99,8 @@ mask.plot_mask()
 All experiments in the ICML paper can be replicated easily. The necessary code is in [experiments](experiments).
 Bellow, we detail the procedure for each experiment.
 
+Scripts to run the experiments are also provided: `experiments/run_<EXPERIMENT>.sh`.
+
 ###  Replicate the Rare experiments
 
 1. Run the following command from the repository folder:
@@ -139,7 +141,7 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
    ```shell
    Options:
    --explainer # The baselines can be: fit, lime, retain, integrated_gradient, deep_lift, fo, afo, gradient_shap
-   --train # Only put this option when fitting the FIRST baseline (this is to avoid retraining a model for each baseline)
+   --train # Only put this option when fitting the FIRST baseline (this is to avoid retraining a model for each baseline); however, required for retain baseline
    --cv # An integer that sets the random seed (first run cv=0, second run cv=1, ...)
    ```
 3. The models and baselines saliency maps are all saved in [this folder](experiments/results/state).
@@ -189,7 +191,7 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
    ```shell
    Options:
    --explainer # The baselines can be: fit, lime, retain, integrated_gradient, deep_lift, fo, afo, gradient_shap
-   --train # Only put this option when fitting the FIRST baseline (this is to avoid retraining a model for each baseline)
+   --train # Only put this option when fitting the FIRST baseline (this is to avoid retraining a model for each baseline); however, required for retain baseline
    --cv # An integer that sets the random seed (first run cv=0, second run cv=1, ...)
    ```
 
