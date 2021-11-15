@@ -10,8 +10,8 @@ For more details on the theoretical side, please read our [ICML 2021 paper](http
 Predictions with Dynamic Masks'.
 
 Part of the experiments in our paper are relying on [FIT](https://github.com/sanatonek/time_series_explainability),
-another repository associated to the [NeurIPS 2021 paper](https://papers.nips.cc/paper/2020/hash/08fa43588c2571ade19bc0fa5936e028-Abstract.html)
-: 'What went wrong and when? Instance-wise feature importance for time-series black-box models'. We have included all
+another repository associated to the [NeurIPS 2021 paper](https://papers.nips.cc/paper/2020/hash/08fa43588c2571ade19bc0fa5936e028-Abstract.html): 
+'What went wrong and when? Instance-wise feature importance for time-series black-box models'. We have included all
 the relevant files in the folder [fit](fit).
 
 ## Installation
@@ -24,6 +24,8 @@ To install the relevant packages from shell:
     ```shell
     pip install -r requirements.txt #install requirements
     ```
+    * If at this point you experience problems installing `psycopg2`, try `psycopg2-binary` (see comment in `requirements.txt`). Note also the dependencies for `psycopg2` installation here: https://www.psycopg.org/install/.
+
 When the packages are installed, Dynamask can directly be used.
 
 ## Toy example
@@ -43,8 +45,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Define a pseudo-black box:
 def black_box(input):
-   output = input[-1, :]  # The black-box returns the features of the last time step
-   return output
+    output = input[-1, :]  # The black-box returns the features of the last time step
+    return output
 # Define a random input:
 X = torch.randn(10, 3).to(device) # The shape of the input has to be (T, N_features)
 
@@ -57,7 +59,7 @@ mask.fit(X, black_box, loss_function=mse, keep_ratio=0.1, size_reg_factor_init=0
 mask.plot_mask()
 ```
 
-If the proportion of features to select is unkown, a good approach is to fit a group of masks
+If the proportion of features to select is unknown, a good approach is to fit a group of masks
 with different areas. Then, the extremal mask can be extracted from the group.
 The relevant code can be found in the file [mask_group](attribution/mask_group.py).
 ```python
@@ -71,8 +73,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Define a pseudo-black box:
 def black_box(input):
-   output = input[-1, :]  # The black-box returns the features of the last time step
-   return output
+    output = input[-1, :]  # The black-box returns the features of the last time step
+    return output
 
 # Define a random input:
 X = torch.randn(10, 3).to(device) # The shape of the input has to be (T, N_features)
@@ -95,7 +97,9 @@ mask.plot_mask()
 ## Replicate experiments
 
 All experiments in the ICML paper can be replicated easily. The necessary code is in [experiments](experiments).
-Bellow , we detail the procedure for each experiment.
+Bellow, we detail the procedure for each experiment.
+
+Scripts to run the experiments are also provided: `experiments/run_<EXPERIMENT>.sh`.
 
 ###  Replicate the Rare experiments
 
@@ -107,7 +111,7 @@ Bellow , we detail the procedure for each experiment.
    To do the experiment with various seeds, please add the following specification to these commands:
    ```shell
    Options:
-   --cv # An integer that sets the random seed (first run cv=0 , second run cv=1, ...)
+   --cv # An integer that sets the random seed (first run cv=0, second run cv=1, ...)
    ```
 2. The results of these experiments are saved in the two following folders: [Rare Feature](experiments/results/rare_feature)
 and [Rare Time](experiments/results/rare_time). To process the results and compute the associated metrics run:
@@ -137,8 +141,8 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
    ```shell
    Options:
    --explainer # The baselines can be: fit, lime, retain, integrated_gradient, deep_lift, fo, afo, gradient_shap
-   --train # Only put this option when fitting the FIRST baseline (this is to avoid retraining a model for each baseline)
-   --cv # An integer that sets the random seed (first run cv=0 , second run cv=1, ...)
+   --train # Only put this option when fitting the FIRST baseline (this is to avoid retraining a model for each baseline); however, required for retain baseline
+   --cv # An integer that sets the random seed (first run cv=0, second run cv=1, ...)
    ```
 3. The models and baselines saliency maps are all saved in [this folder](experiments/results/state).
    Now fit a mask for each of these time series by running:
@@ -161,7 +165,7 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
    ```
 
 ### Replicate the MIMIC experiment
-1. MIMIC-III is a private dataset. For the following, you need to have You need to have the MIMIC-III database running on
+1. MIMIC-III is a private dataset. For the following, you need to have the MIMIC-III database running on
    a local server. For more information, please refer to [the official MIMIC-III documentation](https://mimic.mit.edu/iii/gettingstarted/dbsetup/).
 
 
@@ -187,8 +191,8 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
    ```shell
    Options:
    --explainer # The baselines can be: fit, lime, retain, integrated_gradient, deep_lift, fo, afo, gradient_shap
-   --train # Only put this option when fitting the FIRST baseline (this is to avoid retraining a model for each baseline)
-   --cv # An integer that sets the random seed (first run cv=0 , second run cv=1, ...)
+   --train # Only put this option when fitting the FIRST baseline (this is to avoid retraining a model for each baseline); however, required for retain baseline
+   --cv # An integer that sets the random seed (first run cv=0, second run cv=1, ...)
    ```
 
 5. The models and baselines saliency maps are all saved in [this folder](experiments/results/state).

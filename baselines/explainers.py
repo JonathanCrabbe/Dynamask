@@ -1,16 +1,25 @@
-import torch
-from captum.attr import Occlusion, FeaturePermutation, IntegratedGradients, GradientShap, ShapleyValueSampling
-from utils.tensor_manipulation import normalize as normal
+"""Most of the bellow baselines rely on their captum implementation.
 
-"""
-Most of the bellow baselines rely on their captum implementation.
-For more information, please check https://github.com/pytorch/captum .
+For more information, please check https://github.com/pytorch/captum
+
 Note that these implementations are mainly used in the rate time and feature experiment.
 For the state and mimic experiment, we use the results produced by FIT.
 For more details on the FIT implementations, please check https://github.com/sanatonek/time_series_explainability
 """
 
+import torch
+from captum.attr import (
+    FeaturePermutation,
+    GradientShap,
+    IntegratedGradients,
+    Occlusion,
+    ShapleyValueSampling,
+)
+
+from utils.tensor_manipulation import normalize as normal
+
 # Perturbation methods:
+
 
 class FO:
     def __init__(self, f):
@@ -36,7 +45,9 @@ class FP:
             attr = normal(torch.abs(attr))  # The absolute value of the FP attribution gives the feature importance
         return attr
 
+
 # Integrated Gradient:
+
 
 class IG:
     def __init__(self, f):
@@ -50,7 +61,9 @@ class IG:
             attr = normal(torch.abs(attr))  # The absolute value of the IG attribution gives the feature importance
         return attr
 
+
 # Shapley methods:
+
 
 class GradShap:
     def __init__(self, f):
@@ -58,9 +71,11 @@ class GradShap:
 
     def attribute(self, X, normalize=True):
         explainer = GradientShap(forward_func=self.f, multiply_by_inputs=False)
-        attr = explainer.attribute(X, baselines=torch.cat([0*X, 1*X]))
+        attr = explainer.attribute(X, baselines=torch.cat([0 * X, 1 * X]))
         if normalize:
-            attr = normal(torch.abs(attr))  # The absolute value of the GradShap attribution gives the feature importance
+            attr = normal(
+                torch.abs(attr)
+            )  # The absolute value of the GradShap attribution gives the feature importance
         return attr
 
 
@@ -75,5 +90,3 @@ class SVS:
         if normalize:
             attr = normal(torch.abs(attr))  # The absolute value of the SVS attribution gives the feature importance
         return attr
-
-
