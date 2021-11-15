@@ -10,7 +10,7 @@ from TSX.utils import (
     logistic,
     test_model_rt,
     test,
-    replace_and_predict,
+    # replace_and_predict,
 )
 from TSX.models import EncoderRNN, LR, AttentionModel
 from TSX.generator import (
@@ -841,8 +841,9 @@ class FeatureGeneratorExplainer(Experiment):
                 signals_to_analyze = range(0, 15)
 
             if self.data == "ghg":
+                raise NotImplementedError("data `ghg` not implemented")
                 # Replace and Predict Experiment
-                replace_and_predict(signals_to_analyze, sensitivity_analysis, data=self.data, tvec=tvec)
+                # replace_and_predict(signals_to_analyze, sensitivity_analysis, data=self.data, tvec=tvec)
             else:
                 lime_exp = BaselineExplainer(
                     self.train_loader,

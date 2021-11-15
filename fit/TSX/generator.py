@@ -129,7 +129,7 @@ class FeatureGenerator(torch.nn.Module):
         :param sig_ind: Index of the feature to investigate
         :return: full sample at time t
         """
-        if len(x.shape) is 1:
+        if len(x.shape) is 1:  # noqa: F632
             x = x.unsqueeze(0)
         known_signal = torch.cat((x[:, :sig_ind], x[:, sig_ind + 1 :]), 1).to(self.device)
         x = torch.cat((x[:, :sig_ind], x[:, sig_ind + 1 :]), 1).to(self.device)
@@ -231,7 +231,7 @@ class JointFeatureGenerator(torch.nn.Module):
         :return: full sample at time t
         """
         mean, covariance = self.likelihood_distribution(past)  # P(X_t|X_0:t-1)
-        if len(x.shape) is 1:
+        if len(x.shape) is 1:  # noqa: F632
             x = x.unsqueeze(0)
         if method == "c1":  # c1 method: P(x_{-i,t}|X_{0:t-1}, x_{i,t})
             x_ind = x[:, sig_ind].to(self.device).unsqueeze(-1)
@@ -314,7 +314,7 @@ class JointFeatureGenerator(torch.nn.Module):
             return current, current
         past = past.to(self.device)
         current = current.to(self.device)
-        if len(current.shape) is 1:
+        if len(current.shape) is 1:  # noqa: F632
             current = current.unsqueeze(0)
         mean, covariance = self.likelihood_distribution(past)  # P(X_t|X_0:t-1)
         sig_inds_comp = list(set(range(past.shape[-2])) - set(sig_inds))
