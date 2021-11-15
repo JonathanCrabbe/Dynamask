@@ -1,17 +1,16 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
+
 import torch
 
 
-class Perturbation:
-    """
-    This class allows to create and apply perturbation on inputs based on masks.
+class Perturbation(ABC):
+    """This class allows to create and apply perturbation on inputs based on masks.
 
-    mask_tensor: torch.tensor
-        The mask tensor than indicates the intensity of the perturbation to be applied at each input entry
-    eps: float
-        Small number used for numerical stability
-    device:
-        Device on which the tensor operations are executed
+    Attributes:
+        mask_tensor (torch.tensor):
+            The mask tensor than indicates the intensity of the perturbation to be applied at each input entry.
+        eps (float): Small number used for numerical stability.
+        device: Device on which the tensor operations are executed.
     """
 
     @abstractmethod
@@ -22,36 +21,37 @@ class Perturbation:
 
     @abstractmethod
     def apply(self, X, mask_tensor):
-        """
-        This method applies the perturbation on the input based on the mask tensor.
-        :param X : input tensor
-        :param mask_tensor : tensor containing the mask coefficients
+        """This method applies the perturbation on the input based on the mask tensor.
+
+        Args:
+            X: Input tensor.
+            mask_tensor: Tensor containing the mask coefficients.
         """
         if X is None or mask_tensor is None:
             raise NameError("The mask_tensor should be fitted before or while calling the perturb method.")
 
     @abstractmethod
     def apply_extremal(self, X, extremal_tensor: torch.Tensor):
-        """
-        This method applies the perturbation on the input based on the extremal tensor.
+        """This method applies the perturbation on the input based on the extremal tensor.
+
         The extremal tensor is just a set of mask, the perturbation is applied according to each mask.
-        :param X : input tensor
-        :param extremal_tensor : (N_area, T, N_feature) tensor containing the different masks
+
+        Args:
+            X: Input tensor.
+            extremal_tensor: (N_area, T, N_feature) tensor containing the different masks.
         """
         if X is None or extremal_tensor is None:
             raise NameError("The mask_tensor should be fitted before or while calling the perturb method.")
 
 
 class FadeMovingAverage(Perturbation):
-    """
-    This class allows to create and apply 'fade to moving average' perturbations on inputs based on masks.
+    """This class allows to create and apply 'fade to moving average' perturbations on inputs based on masks.
 
-    mask_tensor: torch.tensor
-        The mask tensor than indicates the intensity of the perturbation to be applied at each input entry
-    eps: float
-        Small number used for numerical stability
-    device:
-        Device on which the tensor operations are executed
+    Attributes:
+        mask_tensor (torch.tensor): The mask tensor than indicates the intensity of the perturbation
+            to be applied at each input entry.
+        eps (float): Small number used for numerical stability.
+        device: Device on which the tensor operations are executed.
     """
 
     def __init__(self, device, eps=1.0e-7):
@@ -77,17 +77,14 @@ class FadeMovingAverage(Perturbation):
 
 
 class GaussianBlur(Perturbation):
-    """
-    This class allows to create and apply 'Gaussian blur' perturbations on inputs based on masks.
+    """This class allows to create and apply 'Gaussian blur' perturbations on inputs based on masks.
 
-    mask_tensor: torch.tensor
-        The mask tensor than indicates the intensity of the perturbation to be applied at each input entry
-    eps: float
-        Small number used for numerical stability
-    device:
-        Device on which the tensor operations are executed
-    sigma_max : float
-        Maximal width for the Gaussian blur
+    Attributes:
+        mask_tensor (torch.tensor): The mask tensor than indicates the intensity of the perturbation
+            to be applied at each input entry.
+        eps (float): Small number used for numerical stability.
+        device: Device on which the tensor operations are executed.
+        sigma_max (float): Maximal width for the Gaussian blur.
     """
 
     def __init__(self, device, eps=1.0e-7, sigma_max=2):
@@ -107,7 +104,7 @@ class GaussianBlur(Perturbation):
         filter_coefs = torch.exp(torch.divide(-1.0 * (T1_tensor - T2_tensor) ** 2, 2.0 * (sigma_tensor ** 2)))
         filter_coefs = torch.divide(filter_coefs, torch.sum(filter_coefs, 0))
         # The perturbation is obtained by replacing each input by the linear combination weighted by Gaussian coefs
-        X_pert = torch.einsum('sti,si->ti', filter_coefs, X)
+        X_pert = torch.einsum("sti,si->ti", filter_coefs, X)
         return X_pert
 
     def apply_extremal(self, X: torch.Tensor, extremal_tensor: torch.Tensor):
@@ -121,22 +118,19 @@ class GaussianBlur(Perturbation):
         filter_coefs = torch.exp(torch.divide(-1.0 * (T1_tensor - T2_tensor) ** 2, 2.0 * (sigma_tensor ** 2)))
         filter_coefs = filter_coefs / torch.sum(filter_coefs, dim=1, keepdim=True)
         # The perturbation is obtained by replacing each input by the linear combination weighted by Gaussian coefs
-        X_pert = torch.einsum('asti,si->ati', filter_coefs, X)
+        X_pert = torch.einsum("asti,si->ati", filter_coefs, X)
         return X_pert
 
 
 class FadeMovingAverageWindow(Perturbation):
-    """
-    This class allows to create and apply 'fade to moving average' perturbations on inputs based on masks.
+    """This class allows to create and apply 'fade to moving average' perturbations on inputs based on masks.
 
-    mask_tensor: torch.tensor
-        The mask tensor than indicates the intensity of the perturbation to be applied at each input entry
-    eps: float
-        Small number used for numerical stability
-    device:
-        Device on which the tensor operations are executed
-    window_size:
-        Size of the window where each moving average is computed (called W in the paper)
+    Attributes:
+        mask_tensor (torch.tensor): The mask tensor than indicates the intensity of the perturbation
+            to be applied at each input entry.
+        eps (float): Small number used for numerical stability.
+        device: Device on which the tensor operations are executed.
+        window_size: Size of the window where each moving average is computed (called W in the paper).
     """
 
     def __init__(self, device, window_size=2, eps=1.0e-7):
@@ -152,7 +146,7 @@ class FadeMovingAverageWindow(Perturbation):
         T2_tensor = T_axis.unsqueeze(0)
         filter_coefs = torch.abs(T1_tensor - T2_tensor) <= self.window_size
         filter_coefs = filter_coefs / (2 * self.window_size + 1)
-        X_avg = torch.einsum('st,si->ti', filter_coefs, X)
+        X_avg = torch.einsum("st,si->ti", filter_coefs, X)
         # The perturbation is just an affine combination of the input and the previous tensor weighted by the mask
         X_pert = X_avg + mask_tensor * (X - X_avg)
         return X_pert
@@ -165,7 +159,7 @@ class FadeMovingAverageWindow(Perturbation):
         T2_tensor = T_axis.unsqueeze(0)
         filter_coefs = torch.abs(T1_tensor - T2_tensor) <= self.window_size
         filter_coefs = filter_coefs / (2 * self.window_size + 1)
-        X_avg = torch.einsum('st,si->ti', filter_coefs, X[0, :, :])
+        X_avg = torch.einsum("st,si->ti", filter_coefs, X[0, :, :])
         X_avg = X_avg.unsqueeze(0)
         # The perturbation is just an affine combination of the input and the previous tensor weighted by the mask
         X_pert = X_avg + masks_tensor * (X - X_avg)
@@ -173,17 +167,14 @@ class FadeMovingAverageWindow(Perturbation):
 
 
 class FadeMovingAveragePastWindow(Perturbation):
-    """
-    This class allows to create and apply 'fade to past moving average' perturbations on inputs based on masks.
+    """This class allows to create and apply 'fade to past moving average' perturbations on inputs based on masks.
 
-    mask_tensor: torch.tensor
-        The mask tensor than indicates the intensity of the perturbation to be applied at each input entry
-    eps: float
-        Small number used for numerical stability
-    device:
-        Device on which the tensor operations are executed
-    window_size:
-        Size of the window where each moving average is computed (called W in the paper)
+    Attributes:
+        mask_tensor (torch.tensor): The mask tensor than indicates the intensity of the perturbation
+            to be applied at each input entry.
+        eps (float): Small number used for numerical stability.
+        device: Device on which the tensor operations are executed.
+        window_size: Size of the window where each moving average is computed (called W in the paper).
     """
 
     def __init__(self, device, window_size=2, eps=1.0e-7):
@@ -199,7 +190,7 @@ class FadeMovingAveragePastWindow(Perturbation):
         T2_tensor = T_axis.unsqueeze(0)
         filter_coefs = (T1_tensor - T2_tensor) <= self.window_size
         filter_coefs = filter_coefs / (2 * self.window_size + 1)
-        X_avg = torch.einsum('st,si->ti', filter_coefs, X)
+        X_avg = torch.einsum("st,si->ti", filter_coefs, X)
         # The perturbation is just an affine combination of the input and the previous tensor weighted by the mask
         X_pert = X_avg + mask_tensor * (X - X_avg)
         return X_pert
@@ -213,7 +204,7 @@ class FadeMovingAveragePastWindow(Perturbation):
         T2_tensor = T_axis.unsqueeze(0)
         filter_coefs = (T1_tensor - T2_tensor) <= self.window_size
         filter_coefs = filter_coefs / (2 * self.window_size + 1)
-        X_avg = torch.einsum('st,si->ti', filter_coefs, X[0, :, :])
+        X_avg = torch.einsum("st,si->ti", filter_coefs, X[0, :, :])
         X_avg = X_avg.unsqueeze(0)
         # The perturbation is just an affine combination of the input and the previous tensor weighted by the mask
         X_pert = X_avg + masks_tensor * (X - X_avg)
@@ -221,17 +212,14 @@ class FadeMovingAveragePastWindow(Perturbation):
 
 
 class FadeReference(Perturbation):
-    """
-    This class allows to create and apply 'fade to reference' perturbation on inputs based on masks.
+    """This class allows to create and apply 'fade to reference' perturbation on inputs based on masks.
 
-    mask_tensor: torch.tensor
-        The mask tensor than indicates the intensity of the perturbation to be applied at each input entry
-    eps: float
-        Small number used for numerical stability
-    device:
-        Device on which the tensor operations are executed
-    X_ref:
-        The baseline input of same size as X
+    Attributes:
+        mask_tensor (torch.tensor): The mask tensor than indicates the intensity of the perturbation
+            to be applied at each input entry.
+        eps (float): Small number used for numerical stability.
+        device: Device on which the tensor operations are executed.
+        X_ref: The baseline input of same size as X.
     """
 
     def __init__(self, device, X_ref, eps=1.0e-7):
@@ -249,4 +237,3 @@ class FadeReference(Perturbation):
         # The perturbation is just an affine combination of the input and the baseline weighted by the mask
         X_pert = self.X_ref + mask_tensor * (X - self.X_ref)
         return X_pert
-
