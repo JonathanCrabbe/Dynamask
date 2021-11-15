@@ -20,7 +20,7 @@ def log_loss(proba_pred, proba_target):
 def log_loss_target(proba_pred, target):
     """
     Computes log loss between the target and the predicted probabilities expressed as torch tensors.
-    The target is a one dimensionnal tensor whose dimension matches the first dimension of proba_pred.
+    The target is a one dimensional tensor whose dimension matches the first dimension of proba_pred.
     It contains integers that represent the true class for each instance.
     """
     proba_select = torch.gather(proba_pred, -1, target)
