@@ -1,57 +1,52 @@
-
 # Generates data from adult ICUs including demographics, lab results and vital measurements
 
 import numpy as np
 import pandas as pd
 import psycopg2
 from scipy.stats import ks_2samp
-import os 
+import os
 import random
 import argparse
 
 
 def replace(group):
-  """ Replace missing values in measurements using mean imputation
+    """ Replace missing values in measurements using mean imputation
   takes in a pandas group, and replaces the null value with the mean of the none null
   values of the same group 
   """
-  mask = group.isnull()
-  group[mask] = group[~mask].mean()
-  return group
+    mask = group.isnull()
+    group[mask] = group[~mask].mean()
+    return group
 
 
 def main(sqluser, sqlpass):
-  random.seed(22891)
-  # Ouput directory to generate the files
-  mimicdir = "./data/mimic/"
-  if not os.path.exists(mimicdir):
-    os.mkdir(mimicdir)
+    random.seed(22891)
+    # Ouput directory to generate the files
+    mimicdir = "./data/mimic/"
+    if not os.path.exists(mimicdir):
+        os.mkdir(mimicdir)
 
+    # create a database connection and connect to local postgres version of mimic
+    dbname = "mimic"
+    schema_name = "mimiciii"
+    con = psycopg2.connect(dbname=dbname, user=sqluser, host="127.0.0.1", password=sqlpass)
+    cur = con.cursor()
+    cur.execute("SET search_path to " + schema_name)
 
-  # create a database connection and connect to local postgres version of mimic
-  dbname = 'mimic'
-  schema_name = 'mimiciii'
-  con = psycopg2.connect(dbname=dbname, user=sqluser, host='127.0.0.1', password=sqlpass)
-  cur = con.cursor()
-  cur.execute('SET search_path to ' + schema_name)
+    # ========get the icu details
 
+    # this query extracts the following:
+    #   Unique ids for the admission, patient and icu stay
+    #   Patient gender
+    #   diagnosis
+    #   age
+    #   ethnicity
+    #   admission type
+    #   first hospital stay
+    #   first icu stay?
+    #   mortality within a week
 
-
-  #========get the icu details 
-
-  # this query extracts the following:
-  #   Unique ids for the admission, patient and icu stay 
-  #   Patient gender 
-  #   diagnosis
-  #   age 
-  #   ethnicity 
-  #   admission type 
-  #   first hospital stay 
-  #   first icu stay?
-  #   mortality within a week
-
-  denquery = \
-  """
+    denquery = """
   --ie is the icustays table 
   --adm is the admissions table 
 
@@ -89,33 +84,43 @@ def main(sqluser, sqlpass):
   ORDER BY ie.subject_id, adm.admittime, ie.intime;
   """
 
-  den = pd.read_sql_query(denquery,con)
+    den = pd.read_sql_query(denquery, con)
 
-  ## drop patients with less than 48 hour 
-  den['los_icu_hr'] = (den.outtime - den.intime).astype('timedelta64[h]')
-  den = den[(den.los_icu_hr >= 48)]
-  den = den[(den.age<300)]
-  den.drop('los_icu_hr', 1, inplace = True)
-  ## clean up
-  den['adult_icu'] = np.where(den['first_careunit'].isin(['PICU', 'NICU']), 0, 1)
-  den['gender'] = np.where(den['gender']=="M", 1, 0)
-  den.ethnicity = den.ethnicity.str.lower()
-  den.ethnicity.loc[(den.ethnicity.str.contains('^white'))] = 'white'
-  den.ethnicity.loc[(den.ethnicity.str.contains('^black'))] = 'black'
-  den.ethnicity.loc[(den.ethnicity.str.contains('^hisp')) | (den.ethnicity.str.contains('^latin'))] = 'hispanic'
-  den.ethnicity.loc[(den.ethnicity.str.contains('^asia'))] = 'asian'
-  den.ethnicity.loc[~(den.ethnicity.str.contains('|'.join(['white', 'black', 'hispanic', 'asian'])))] = 'other'
+    ## drop patients with less than 48 hour
+    den["los_icu_hr"] = (den.outtime - den.intime).astype("timedelta64[h]")
+    den = den[(den.los_icu_hr >= 48)]
+    den = den[(den.age < 300)]
+    den.drop("los_icu_hr", 1, inplace=True)
+    ## clean up
+    den["adult_icu"] = np.where(den["first_careunit"].isin(["PICU", "NICU"]), 0, 1)
+    den["gender"] = np.where(den["gender"] == "M", 1, 0)
+    den.ethnicity = den.ethnicity.str.lower()
+    den.ethnicity.loc[(den.ethnicity.str.contains("^white"))] = "white"
+    den.ethnicity.loc[(den.ethnicity.str.contains("^black"))] = "black"
+    den.ethnicity.loc[(den.ethnicity.str.contains("^hisp")) | (den.ethnicity.str.contains("^latin"))] = "hispanic"
+    den.ethnicity.loc[(den.ethnicity.str.contains("^asia"))] = "asian"
+    den.ethnicity.loc[~(den.ethnicity.str.contains("|".join(["white", "black", "hispanic", "asian"])))] = "other"
 
-  den.drop(['hospstay_seq', 'los_icu','icustay_seq', 'admittime', 'dischtime','los_hospital', 'intime', 'outtime', 'first_careunit'], 1, inplace =True) 
+    den.drop(
+        [
+            "hospstay_seq",
+            "los_icu",
+            "icustay_seq",
+            "admittime",
+            "dischtime",
+            "los_hospital",
+            "intime",
+            "outtime",
+            "first_careunit",
+        ],
+        1,
+        inplace=True,
+    )
 
+    # ========= 48 hour vitals query
+    # these are the normal ranges. useful to clean up the data
 
-
-
-  #========= 48 hour vitals query 
-  # these are the normal ranges. useful to clean up the data
-
-  vitquery = \
-  """
+    vitquery = """
   -- This query pivots the vital signs for the first 48 hours of a patient's stay
   -- Vital signs include heart rate, blood pressure, respiration rate, and temperature
   -- DROP MATERIALIZED VIEW IF EXISTS vitalsfirstday CASCADE;
@@ -219,15 +224,12 @@ def main(sqluser, sqlpass):
   where VitalID is not null
   order by pvt.subject_id, pvt.hadm_id, pvt.icustay_id, pvt.VitalID, pvt.VitalChartTime;
   """
-  vit48 = pd.read_sql_query(vitquery,con)
-  vit48.isnull().sum()
+    vit48 = pd.read_sql_query(vitquery, con)
+    vit48.isnull().sum()
 
-
-
-  #===============48 hour labs query 
-  # This query extracts the lab events in the first 48 hours 
-  labquery = \
-  """
+    # ===============48 hour labs query
+    # This query extracts the lab events in the first 48 hours
+    labquery = """
   WITH pvt AS (
     --- ie is the icu stay 
     --- ad is the admissions table 
@@ -349,37 +351,40 @@ def main(sqluser, sqlpass):
 
   """
 
-  lab48 = pd.read_sql_query(labquery,con)
+    lab48 = pd.read_sql_query(labquery, con)
+
+    # =====combine all variables
+    mort_vital = den.merge(vit48, how="left", on=["subject_id", "hadm_id", "icustay_id"])
+    mort_lab = den.merge(lab48, how="left", on=["subject_id", "hadm_id", "icustay_id"])
+
+    # create means by age group and gender
+    mort_vital["age_group"] = pd.cut(
+        mort_vital["age"],
+        [-1, 5, 10, 15, 20, 25, 40, 60, 80, 200],
+        labels=["l5", "5_10", "10_15", "15_20", "20_25", "25_40", "40_60", "60_80", "80p"],
+    )
+    mort_lab["age_group"] = pd.cut(
+        mort_lab["age"],
+        [-1, 5, 10, 15, 20, 25, 40, 60, 80, 200],
+        labels=["l5", "5_10", "10_15", "15_20", "20_25", "25_40", "40_60", "60_80", "80p"],
+    )
+
+    # one missing variable
+    adult_vital = mort_vital[(mort_vital.adult_icu == 1)]
+    adult_lab = mort_lab[(mort_lab.adult_icu == 1)]
+    adult_vital.drop(columns=["adult_icu"], inplace=True)
+    adult_lab.drop(columns=["adult_icu"], inplace=True)
+
+    adult_vital.to_csv(os.path.join(mimicdir, "adult_icu_vital.gz"), compression="gzip", index=False)
+    mort_lab.to_csv(os.path.join(mimicdir, "adult_icu_lab.gz"), compression="gzip", index=False)
 
 
-  #=====combine all variables 
-  mort_vital = den.merge(vit48,how = 'left',    on = ['subject_id', 'hadm_id', 'icustay_id'])
-  mort_lab = den.merge(lab48,how = 'left',    on = ['subject_id', 'hadm_id', 'icustay_id'])
+if __name__ == "__main__":
 
-
-  # create means by age group and gender 
-  mort_vital['age_group'] = pd.cut(mort_vital['age'], [-1,5,10,15,20, 25, 40,60, 80, 200], 
-    labels = ['l5','5_10', '10_15', '15_20', '20_25', '25_40', '40_60',  '60_80', '80p'])
-  mort_lab['age_group'] = pd.cut(mort_lab['age'], [-1,5,10,15,20, 25, 40,60, 80, 200], 
-    labels = ['l5','5_10', '10_15', '15_20', '20_25', '25_40', '40_60',  '60_80', '80p'])
-
-  
-  # one missing variable 
-  adult_vital = mort_vital[(mort_vital.adult_icu==1)]
-  adult_lab = mort_lab[(mort_lab.adult_icu==1)]
-  adult_vital.drop(columns=['adult_icu'], inplace=True)
-  adult_lab.drop(columns=['adult_icu'], inplace=True)
-  
-  adult_vital.to_csv(os.path.join(mimicdir, 'adult_icu_vital.gz'), compression='gzip',  index = False)
-  mort_lab.to_csv(os.path.join(mimicdir, 'adult_icu_lab.gz'), compression='gzip',  index = False)
-
-
-
-
-if __name__=="__main__":
-
-  parser = argparse.ArgumentParser(description='Query ICU mortality data from mimic database')
-  parser.add_argument('--sqluser',type=str, default='mimicuser' ,help='postgres user to access mimic database')
-  parser.add_argument('--sqlpass',type=str , default='Iv7bahqu', help='postgres user password to access mimic database')
-  args = parser.parse_args()
-  main(args.sqluser, args.sqlpass)
+    parser = argparse.ArgumentParser(description="Query ICU mortality data from mimic database")
+    parser.add_argument("--sqluser", type=str, default="mimicuser", help="postgres user to access mimic database")
+    parser.add_argument(
+        "--sqlpass", type=str, default="Iv7bahqu", help="postgres user password to access mimic database"
+    )
+    args = parser.parse_args()
+    main(args.sqluser, args.sqlpass)
