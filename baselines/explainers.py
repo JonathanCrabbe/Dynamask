@@ -12,6 +12,7 @@ For more details on the FIT implementations, please check https://github.com/san
 
 # Perturbation methods:
 
+
 class FO:
     def __init__(self, f):
         self.f = f
@@ -36,7 +37,9 @@ class FP:
             attr = normal(torch.abs(attr))  # The absolute value of the FP attribution gives the feature importance
         return attr
 
+
 # Integrated Gradient:
+
 
 class IG:
     def __init__(self, f):
@@ -50,7 +53,9 @@ class IG:
             attr = normal(torch.abs(attr))  # The absolute value of the IG attribution gives the feature importance
         return attr
 
+
 # Shapley methods:
+
 
 class GradShap:
     def __init__(self, f):
@@ -58,9 +63,11 @@ class GradShap:
 
     def attribute(self, X, normalize=True):
         explainer = GradientShap(forward_func=self.f, multiply_by_inputs=False)
-        attr = explainer.attribute(X, baselines=torch.cat([0*X, 1*X]))
+        attr = explainer.attribute(X, baselines=torch.cat([0 * X, 1 * X]))
         if normalize:
-            attr = normal(torch.abs(attr))  # The absolute value of the GradShap attribution gives the feature importance
+            attr = normal(
+                torch.abs(attr)
+            )  # The absolute value of the GradShap attribution gives the feature importance
         return attr
 
 
@@ -75,5 +82,3 @@ class SVS:
         if normalize:
             attr = normal(torch.abs(attr))  # The absolute value of the SVS attribution gives the feature importance
         return attr
-
-

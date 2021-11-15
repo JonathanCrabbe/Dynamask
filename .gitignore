@@ -143,3 +143,4 @@ experiments/results/state/*
 .vscode
 .flake8
 .pylint
+pyproject.toml

@@ -107,7 +107,7 @@ class GaussianBlur(Perturbation):
         filter_coefs = torch.exp(torch.divide(-1.0 * (T1_tensor - T2_tensor) ** 2, 2.0 * (sigma_tensor ** 2)))
         filter_coefs = torch.divide(filter_coefs, torch.sum(filter_coefs, 0))
         # The perturbation is obtained by replacing each input by the linear combination weighted by Gaussian coefs
-        X_pert = torch.einsum('sti,si->ti', filter_coefs, X)
+        X_pert = torch.einsum("sti,si->ti", filter_coefs, X)
         return X_pert
 
     def apply_extremal(self, X: torch.Tensor, extremal_tensor: torch.Tensor):
@@ -121,7 +121,7 @@ class GaussianBlur(Perturbation):
         filter_coefs = torch.exp(torch.divide(-1.0 * (T1_tensor - T2_tensor) ** 2, 2.0 * (sigma_tensor ** 2)))
         filter_coefs = filter_coefs / torch.sum(filter_coefs, dim=1, keepdim=True)
         # The perturbation is obtained by replacing each input by the linear combination weighted by Gaussian coefs
-        X_pert = torch.einsum('asti,si->ati', filter_coefs, X)
+        X_pert = torch.einsum("asti,si->ati", filter_coefs, X)
         return X_pert
 
 
@@ -152,7 +152,7 @@ class FadeMovingAverageWindow(Perturbation):
         T2_tensor = T_axis.unsqueeze(0)
         filter_coefs = torch.abs(T1_tensor - T2_tensor) <= self.window_size
         filter_coefs = filter_coefs / (2 * self.window_size + 1)
-        X_avg = torch.einsum('st,si->ti', filter_coefs, X)
+        X_avg = torch.einsum("st,si->ti", filter_coefs, X)
         # The perturbation is just an affine combination of the input and the previous tensor weighted by the mask
         X_pert = X_avg + mask_tensor * (X - X_avg)
         return X_pert
@@ -165,7 +165,7 @@ class FadeMovingAverageWindow(Perturbation):
         T2_tensor = T_axis.unsqueeze(0)
         filter_coefs = torch.abs(T1_tensor - T2_tensor) <= self.window_size
         filter_coefs = filter_coefs / (2 * self.window_size + 1)
-        X_avg = torch.einsum('st,si->ti', filter_coefs, X[0, :, :])
+        X_avg = torch.einsum("st,si->ti", filter_coefs, X[0, :, :])
         X_avg = X_avg.unsqueeze(0)
         # The perturbation is just an affine combination of the input and the previous tensor weighted by the mask
         X_pert = X_avg + masks_tensor * (X - X_avg)
@@ -199,7 +199,7 @@ class FadeMovingAveragePastWindow(Perturbation):
         T2_tensor = T_axis.unsqueeze(0)
         filter_coefs = (T1_tensor - T2_tensor) <= self.window_size
         filter_coefs = filter_coefs / (2 * self.window_size + 1)
-        X_avg = torch.einsum('st,si->ti', filter_coefs, X)
+        X_avg = torch.einsum("st,si->ti", filter_coefs, X)
         # The perturbation is just an affine combination of the input and the previous tensor weighted by the mask
         X_pert = X_avg + mask_tensor * (X - X_avg)
         return X_pert
@@ -213,7 +213,7 @@ class FadeMovingAveragePastWindow(Perturbation):
         T2_tensor = T_axis.unsqueeze(0)
         filter_coefs = (T1_tensor - T2_tensor) <= self.window_size
         filter_coefs = filter_coefs / (2 * self.window_size + 1)
-        X_avg = torch.einsum('st,si->ti', filter_coefs, X[0, :, :])
+        X_avg = torch.einsum("st,si->ti", filter_coefs, X[0, :, :])
         X_avg = X_avg.unsqueeze(0)
         # The perturbation is just an affine combination of the input and the previous tensor weighted by the mask
         X_pert = X_avg + masks_tensor * (X - X_avg)
@@ -249,4 +249,3 @@ class FadeReference(Perturbation):
         # The perturbation is just an affine combination of the input and the baseline weighted by the mask
         X_pert = self.X_ref + mask_tensor * (X - self.X_ref)
         return X_pert
-

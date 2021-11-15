@@ -3,7 +3,7 @@ import torch
 
 def normalize(tensor, eps=1.0e-7):
     tensor -= tensor.min()
-    tensor /= (tensor.max() + eps)
+    tensor /= tensor.max() + eps
     return tensor
 
 

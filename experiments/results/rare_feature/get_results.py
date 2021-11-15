@@ -8,12 +8,12 @@ from utils.metrics import get_information_array, get_entropy_array
 
 def process_results(CV, explainer_list):
     metrics = np.zeros((4, len(explainer_list), CV))
-    results_df = pd.DataFrame(columns=['AUP', 'AUP std', 'AUR', 'AUR std', 'Info', 'Info std', 'Entr', 'Entr std'])
+    results_df = pd.DataFrame(columns=["AUP", "AUP std", "AUR", "AUR std", "Info", "Info std", "Entr", "Entr std"])
     for cv in range(CV):
-        with open(f'experiments/results/rare_feature/true_saliency_{cv}.pkl', 'rb') as f:
+        with open(f"experiments/results/rare_feature/true_saliency_{cv}.pkl", "rb") as f:
             true_saliency = pkl.load(f).cpu().numpy()
         for e, explainer in enumerate(explainer_list):
-            with open(f'experiments/results/rare_feature/{explainer}_saliency_{cv}.pkl', 'rb') as f:
+            with open(f"experiments/results/rare_feature/{explainer}_saliency_{cv}.pkl", "rb") as f:
                 pred_saliency = pkl.load(f).cpu().numpy()
             prec, rec, thres = precision_recall_curve(true_saliency.flatten(), pred_saliency.flatten())
             metrics[0, e, cv] = auc(thres, prec[1:])
@@ -37,7 +37,7 @@ def process_results(CV, explainer_list):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--CV', default=1, help='Number of runs for the experiment.', type=int)
-    parser.add_argument('--explainers', nargs='+', help='The explainers to include', type=str)
+    parser.add_argument("--CV", default=1, help="Number of runs for the experiment.", type=int)
+    parser.add_argument("--explainers", nargs="+", help="The explainers to include", type=str)
     args = parser.parse_args()
     process_results(args.CV, args.explainers)
