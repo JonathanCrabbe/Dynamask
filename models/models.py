@@ -4,16 +4,17 @@ It is used to reproduce the state and mimic experiments form the original paper 
 Please refer to the original the above repository for more details.
 """
 
-import numpy as np
+import os
 import pickle
 import random
+
+import numpy as np
 import torch
-import os
 import torch.nn.functional as F
-from torch import nn
-from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
-from torch.autograd import Variable
 from sklearn.model_selection import StratifiedShuffleSplit
+from torch import nn
+from torch.autograd import Variable
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 intervention_list = [
     "vent",

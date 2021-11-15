@@ -1,11 +1,13 @@
-import torch
 import time
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
+import torch
 import torch.optim as optim
-from attribution.perturbation import Perturbation
+
 from attribution.mask import Mask
+from attribution.perturbation import Perturbation
 
 
 class MaskGroup:

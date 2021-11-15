@@ -1,9 +1,11 @@
+import argparse
 import pickle as pkl
+
 import numpy as np
 import pandas as pd
-import argparse
 from sklearn.metrics import auc, precision_recall_curve
-from utils.metrics import get_information_array, get_entropy_array
+
+from utils.metrics import get_entropy_array, get_information_array
 
 
 def process_results(CV, explainer_list):

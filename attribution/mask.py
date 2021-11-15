@@ -1,13 +1,15 @@
+import time
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import time
-import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
+from torch.nn import Softmax
+
 from attribution.perturbation import Perturbation
 from utils.metrics import get_entropy, get_information
-from torch.nn import Softmax
 
 
 class Mask:

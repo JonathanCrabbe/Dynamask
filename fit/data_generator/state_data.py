@@ -1,7 +1,8 @@
-import numpy as np
-import pickle
 import argparse
 import os
+import pickle
+
+import numpy as np
 
 SIG_NUM = 3
 STATE_NUM = 1

@@ -1,14 +1,15 @@
-import random
-import torch
 import os
+import random
+
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
+from sklearn.mixture import GaussianMixture
+from torch.distributions.multivariate_normal import MultivariateNormal
 
 # from pyro.distributions import MultivariateNormal
 # from pyro.distributions import OMTMultivariateNormal
 
-from torch.distributions.multivariate_normal import MultivariateNormal
-from sklearn.mixture import GaussianMixture
 
 # from pydlm import dlm, autoReg
 

@@ -1,17 +1,18 @@
-import numpy as np
 import os
+import pickle as pkl
+import warnings
+
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 import torch
 import torch.utils.data as utils
-from torch.utils.data import DataLoader
-from sklearn.metrics import precision_score, roc_auc_score
-from fit.TSX.models import PatientData
-import matplotlib.pyplot as plt
-import matplotlib
-import pickle as pkl
+from sklearn.metrics import classification_report, precision_score, roc_auc_score
 from sklearn.model_selection import KFold, StratifiedShuffleSplit
-from sklearn.metrics import classification_report
-import seaborn as sns
-import warnings
+from torch.utils.data import DataLoader
+
+from fit.TSX.models import PatientData
 
 # np.set_printoptions(threshold=sys.maxsize)
 # sns.set()
@@ -322,7 +323,9 @@ def train_model_multiclass(
                 precision_train += precision
                 count += 1
 
-                if type(loss_criterion).__name__ == type(torch.nn.CrossEntropyLoss()).__name__:  # multiclass  # noqa: E721
+                if (
+                    type(loss_criterion).__name__ == type(torch.nn.CrossEntropyLoss()).__name__  # noqa: E721
+                ):  # multiclass
                     # print('here')
                     _, targets = label.max(1)
                     targets = targets.long()

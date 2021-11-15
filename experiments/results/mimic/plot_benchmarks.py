@@ -1,11 +1,13 @@
-import numpy as np
-import pickle as pkl
-import matplotlib.pyplot as plt
 import argparse
+import os
+import pickle as pkl
+
+import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
 import torch
-import os
 from sklearn import metrics
+
 from models.models import StateClassifier
 
 

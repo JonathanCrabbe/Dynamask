@@ -1,41 +1,38 @@
-import os
 import argparse
-import torch
-import numpy as np
-import seaborn as sns
-
+import os
 import pickle as pkl
 import time
 
+import numpy as np
+import seaborn as sns
+import torch
 from matplotlib import rc
-
-from fit.TSX.utils import (
-    load_simulated_data,
-    train_model_rt,
-    compute_median_rank,
-    train_model_rt_binary,
-    train_model_multiclass,
-    train_model,
-    load_data,
-)
-from fit.TSX.models import StateClassifier, RETAIN, EncoderRNN, StateClassifierMIMIC
-
-from fit.TSX.generator import JointFeatureGenerator, JointDistributionGenerator
-from fit.TSX.explainers import (
-    RETAINexplainer,
-    FITExplainer,
-    IGExplainer,
-    FFCExplainer,
-    DeepLiftExplainer,
-    GradientShapExplainer,
-    AFOExplainer,
-    FOExplainer,
-    # SHAPExplainer,
-    LIMExplainer,
-    CarryForwardExplainer,
-    MeanImpExplainer,
-)
 from sklearn import metrics
+
+from fit.TSX.explainers import (  # SHAPExplainer,
+    AFOExplainer,
+    CarryForwardExplainer,
+    DeepLiftExplainer,
+    FFCExplainer,
+    FITExplainer,
+    FOExplainer,
+    GradientShapExplainer,
+    IGExplainer,
+    LIMExplainer,
+    MeanImpExplainer,
+    RETAINexplainer,
+)
+from fit.TSX.generator import JointDistributionGenerator, JointFeatureGenerator
+from fit.TSX.models import RETAIN, EncoderRNN, StateClassifier, StateClassifierMIMIC
+from fit.TSX.utils import (
+    compute_median_rank,
+    load_data,
+    load_simulated_data,
+    train_model,
+    train_model_multiclass,
+    train_model_rt,
+    train_model_rt_binary,
+)
 
 sns.set()
 rc("font", weight="bold")

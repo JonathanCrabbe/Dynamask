@@ -1,11 +1,12 @@
 # Generates data from adult ICUs including demographics, lab results and vital measurements
 
+import argparse
+import os
+import random
+
 import numpy as np
 import pandas as pd
 import psycopg2
-import os
-import random
-import argparse
 
 
 def replace(group):

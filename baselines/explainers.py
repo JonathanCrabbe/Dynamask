@@ -1,5 +1,12 @@
 import torch
-from captum.attr import Occlusion, FeaturePermutation, IntegratedGradients, GradientShap, ShapleyValueSampling
+from captum.attr import (
+    FeaturePermutation,
+    GradientShap,
+    IntegratedGradients,
+    Occlusion,
+    ShapleyValueSampling,
+)
+
 from utils.tensor_manipulation import normalize as normal
 
 """

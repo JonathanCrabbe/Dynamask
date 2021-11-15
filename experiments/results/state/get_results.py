@@ -1,10 +1,12 @@
-import numpy as np
-import pickle as pkl
-import pandas as pd
 import argparse
 import os
+import pickle as pkl
+
+import numpy as np
+import pandas as pd
 from sklearn import metrics
-from utils.metrics import get_information_array, get_entropy_array
+
+from utils.metrics import get_entropy_array, get_information_array
 
 
 def process_results(CV, explainers):
