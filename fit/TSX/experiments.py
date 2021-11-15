@@ -1,5 +1,6 @@
 import torch
-import os, glob
+import os
+import glob
 from abc import ABC, abstractmethod
 from TSX.utils import (
     train_model,
@@ -22,7 +23,6 @@ from TSX.generator import (
 )
 import seaborn as sns
 
-sns.set()
 import matplotlib.colors as mcolors
 import matplotlib
 import numpy as np
@@ -32,6 +32,8 @@ import time
 
 import lime
 import lime.lime_tabular
+
+sns.set()
 
 font = {"family": "normal", "weight": "bold", "size": 82}
 matplotlib.rc("font", **font)
@@ -594,7 +596,7 @@ class FeatureGeneratorExplainer(Experiment):
         if not os.path.exists(check_path):
             raise RuntimeError("No saved checkpoint for this model")
 
-        if not "simulation" in self.data:
+        if not "simulation" in self.data:  # noqa: E713
             self.risk_predictor.load_state_dict(
                 torch.load(os.path.join(self.ckpt_path, "risk_predictor_%s.pt" % self.predictor_model))
             )
@@ -644,7 +646,8 @@ class FeatureGeneratorExplainer(Experiment):
             signals_to_analyze = range(0, 15)
 
         if self.data == "ghg":
-            replace_and_predict(signals_to_analyze, sensitivity_analysis, data=self.data, tvec=tvec)
+            raise NotImplementedError("data `ghg` not implemented")
+            # replace_and_predict(signals_to_analyze, sensitivity_analysis, data=self.data, tvec=tvec)
         else:
             for sub_ind, sample_ID in enumerate(samples_to_analyze):
                 print("Fetching importance results for sample %d" % sample_ID)
@@ -703,7 +706,7 @@ class FeatureGeneratorExplainer(Experiment):
                 raise RuntimeError("No saved checkpoint for this model")
 
             else:
-                if not "simulation" in self.data:
+                if not "simulation" in self.data:  # noqa: E713
                     self.risk_predictor.load_state_dict(
                         torch.load(os.path.join(self.ckpt_path, "risk_predictor_%s.pt" % self.predictor_model))
                     )
@@ -775,7 +778,7 @@ class FeatureGeneratorExplainer(Experiment):
             nt = len(tvec)
             sensitivity_analysis = np.zeros((signal.shape))
             sensitivity_start = time.time()
-            if not "simulation" in self.data:
+            if not "simulation" in self.data:  # noqa: E713
                 if self.data == "mimic" or self.data == "ghg":
                     self.risk_predictor.train()
                     for t_ind, t in enumerate(tvec):

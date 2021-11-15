@@ -5,12 +5,12 @@ import sys
 import re
 
 # from TSX.generator import JointFeatureGenerator, train_joint_feature_generator, JointDistributionGenerator
-from fit.TSX.utils import load_simulated_data, AverageMeter
+from fit.TSX.utils import AverageMeter
 from sklearn.metrics import roc_auc_score, average_precision_score
 from tqdm import tnrange, tqdm_notebook
 import matplotlib.pyplot as plt
-from fit.TSX.generator import train_joint_feature_generator, JointDistributionGenerator
-from captum.attr import IntegratedGradients, DeepLift, GradientShap, Saliency
+from fit.TSX.generator import train_joint_feature_generator
+from captum.attr import IntegratedGradients, DeepLift, GradientShap
 import lime
 import lime.lime_tabular
 
@@ -84,7 +84,7 @@ class FITExplainer:
                     x_hat[:, :, t] = x_hat_t
                     y_hat_t = self.activation(self.base_model(x_hat))
                     if distance_metric == "kl":
-                        if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:
+                        if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:  # noqa: E721
                             div = torch.sum(
                                 torch.nn.KLDivLoss(reduction="none")(torch.log(p_tm1), p_y_t), -1
                             ) - torch.sum(torch.nn.KLDivLoss(reduction="none")(torch.log(y_hat_t), p_y_t), -1)
@@ -154,7 +154,7 @@ class FFCExplainer:
                     x_hat_t = self.generator.forward_joint(x[:, :, :t])
                     x_hat[:, i, t] = x_hat_t[:, i]
                     y_hat_t = self.activation(self.base_model(x_hat))
-                    if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:
+                    if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:  # noqa: E721
                         # kl = torch.nn.KLDivLoss(reduction='none')(torch.log(y_hat_t), p_y_t)
                         kl = kl_multiclass(p_y_t, y_hat_t)
                     else:
@@ -543,7 +543,7 @@ class DeepLiftExplainer:
             for t in range(1, x.shape[-1]):
                 x_in = x[:, :, : t + 1]
                 pred = self.activation(self.base_model(x_in))
-                if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:
+                if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:  # noqa: E721
                     target = torch.argmax(pred, -1)
                     imp = self.explainer.attribute(x_in, target=target.long(), baselines=(x[:, :, : t + 1] * 0))
                     score[:, :, t] = abs(imp.detach().cpu().numpy()[:, :, -1])
@@ -552,7 +552,7 @@ class DeepLiftExplainer:
                     n_labels = pred.shape[1]
                     if n_labels > 1:
                         imp = torch.zeros(list(x_in.shape) + [n_labels])
-                        for l in range(n_labels):
+                        for l in range(n_labels):  # noqa: E741
                             target = (pred[:, l] > 0.5).float()  # [:,0]
                             imp[:, :, :, l] = self.explainer.attribute(x_in, target=target.long(), baselines=(x_in * 0))
                         score[:, :, t] = (imp.detach().cpu().numpy()).max(3)[:, :, -1]
@@ -584,7 +584,7 @@ class IGExplainer:
             for t in range(x.shape[-1]):
                 x_in = x[:, :, : t + 1]
                 pred = self.activation(self.base_model(x_in))
-                if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:
+                if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:  # noqa: E721
                     target = torch.argmax(pred, -1)
                     imp = self.explainer.attribute(x_in, target=target, baselines=(x[:, :, : t + 1] * 0))
                     score[:, :, t] = imp.detach().cpu().numpy()[:, :, -1]
@@ -593,7 +593,7 @@ class IGExplainer:
                     n_labels = pred.shape[1]
                     if n_labels > 1:
                         imp = torch.zeros(list(x_in.shape) + [n_labels])
-                        for l in range(n_labels):
+                        for l in range(n_labels):  # noqa: E741
                             target = (pred[:, l] > 0.5).float()  # [:,0]
                             imp[:, :, :, l] = self.explainer.attribute(x_in, target=target.long(), baselines=(x_in * 0))
                         score[:, :, t] = (imp.detach().cpu().numpy()).max(3)[:, :, -1]
@@ -626,7 +626,7 @@ class GradientShapExplainer:
             for t in range(x.shape[-1]):
                 x_in = x[:, :, : t + 1]
                 pred = self.activation(self.base_model(x_in))
-                if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:
+                if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:  # noqa: E721
                     target = torch.argmax(pred, -1)
                     imp = self.explainer.attribute(
                         x_in,
@@ -640,7 +640,7 @@ class GradientShapExplainer:
                     n_labels = pred.shape[1]
                     if n_labels > 1:
                         imp = torch.zeros(list(x_in.shape) + [n_labels])
-                        for l in range(n_labels):
+                        for l in range(n_labels):  # noqa: E741
                             target = (pred[:, l] > 0.5).float()  # [:,0]
                             imp[:, :, :, l] = self.explainer.attribute(x_in, target=target.long(), baselines=(x_in * 0))
                         score[:, :, t] = (imp.detach().cpu().numpy()).max(3)[:, :, -1]
@@ -652,27 +652,27 @@ class GradientShapExplainer:
         return score
 
 
-class SHAPExplainer:
-    def __init__(self, model, train_loader):
-        self.device = "cuda"  #'cuda' if torch.cuda.is_available() else 'cpu'
-        model.to(self.device)
-        self.base_model = model
-        self.base_model.device = self.device
-        trainset = list(train_loader.dataset)
-        x_train = torch.stack([x[0] for x in trainset])
-        background = x_train[np.random.choice(np.arange(len(x_train)), 100, replace=False)]
-        self.explainer = shap.DeepExplainer(self.base_model, background.to(self.device))
+# class SHAPExplainer:
+#     def __init__(self, model, train_loader):
+#         self.device = "cuda"  # 'cuda' if torch.cuda.is_available() else 'cpu'
+#         model.to(self.device)
+#         self.base_model = model
+#         self.base_model.device = self.device
+#         trainset = list(train_loader.dataset)
+#         x_train = torch.stack([x[0] for x in trainset])
+#         background = x_train[np.random.choice(np.arange(len(x_train)), 100, replace=False)]
+#         self.explainer = shap.DeepExplainer(self.base_model, background.to(self.device))
 
-    def attribute(self, x, y, retrospective=False):
-        x.to(self.device)
-        if retrospective:
-            score = self.explainer.shap_values(x)
-        else:
-            score = np.zeros(x.shape)
-            for t in range(1, x.shape[-1]):
-                imp = self.explainer.shap_values(torch.reshape(x[:, :, : t + 1], (x.shape[0], -1)))
-                score[:, :, t] = imp.detach().cpu().numpy()[:, :, -1]
-        return score
+#     def attribute(self, x, y, retrospective=False):
+#         x.to(self.device)
+#         if retrospective:
+#             score = self.explainer.shap_values(x)
+#         else:
+#             score = np.zeros(x.shape)
+#             for t in range(1, x.shape[-1]):
+#                 imp = self.explainer.shap_values(torch.reshape(x[:, :, : t + 1], (x.shape[0], -1)))
+#                 score[:, :, t] = imp.detach().cpu().numpy()[:, :, -1]
+#         return score
 
 
 class LIMExplainer:
@@ -711,7 +711,7 @@ class LIMExplainer:
             for t in range(1, x.shape[-1]):
                 imp = self.explainer.explain_instance(sample[:, t], self._predictor_wrapper, top_labels=self.n_classes)
                 # This likely should change
-                if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:
+                if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:  # noqa: E721
                     for ind, st in enumerate(imp.as_list()):
                         imp_score = st[1]
                         terms = re.split("< | > | <= | >=", st[0])
@@ -728,68 +728,68 @@ class LIMExplainer:
         return score
 
 
-class FITSubGroupExplainer:
-    def __init__(self, model, generator=None, activation=torch.nn.Softmax(-1)):
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.generator = generator
-        self.base_model = model.to(self.device)
-        self.activation = activation
+# class FITSubGroupExplainer:
+#     def __init__(self, model, generator=None, activation=torch.nn.Softmax(-1)):
+#         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+#         self.generator = generator
+#         self.base_model = model.to(self.device)
+#         self.activation = activation
 
-    def fit_generator(self, generator_model, train_loader, test_loader, n_epochs=300):
-        train_joint_feature_generator(
-            generator_model,
-            train_loader,
-            test_loader,
-            generator_type="joint_generator",
-            n_epochs=300,
-            lr=0.001,
-            weight_decay=0,
-        )
-        self.generator = generator_model.to(self.device)
+#     def fit_generator(self, generator_model, train_loader, test_loader, n_epochs=300):
+#         train_joint_feature_generator(
+#             generator_model,
+#             train_loader,
+#             test_loader,
+#             generator_type="joint_generator",
+#             n_epochs=300,
+#             lr=0.001,
+#             weight_decay=0,
+#         )
+#         self.generator = generator_model.to(self.device)
 
-    def attribute(self, x, y, n_samples=10, retrospective=False, distance_metric="kl"):
-        """
-        Compute importance score for a sample x, over time and features
-        :param x: Sample instance to evaluate score for. Shape:[batch, features, time]
-        :param n_samples: number of Monte-Carlo samples
-        :return: Importance score matrix of shape:[batch, features, time]
-        """
-        self.generator.eval()
-        self.generator.to(self.device)
-        x = x.to(self.device)
-        _, n_features, t_len = x.shape
-        score = np.zeros(x.shape)
-        if retrospective:
-            p_y_t = self.activation(self.base_model(x))
+#     def attribute(self, x, y, n_samples=10, retrospective=False, distance_metric="kl"):
+#         """
+#         Compute importance score for a sample x, over time and features
+#         :param x: Sample instance to evaluate score for. Shape:[batch, features, time]
+#         :param n_samples: number of Monte-Carlo samples
+#         :return: Importance score matrix of shape:[batch, features, time]
+#         """
+#         self.generator.eval()
+#         self.generator.to(self.device)
+#         x = x.to(self.device)
+#         _, n_features, t_len = x.shape
+#         score = np.zeros(x.shape)
+#         if retrospective:
+#             p_y_t = self.activation(self.base_model(x))
 
-        for t in range(1, t_len):
-            if not retrospective:
-                p_y_t = self.activation(self.base_model(x[:, :, : t + 1]))
-            x_hat = x[:, :, 0 : t + 1].clone()
-            div_all = []
-            p_tm1 = self.activation(self.base_model(x[:, :, 0:t]))
-            for _ in range(n_samples):
-                x_hat_t, _ = self.generator.forward_conditional(x[:, :, :t], x[:, :, t], S)
-                x_hat[:, :, t] = x_hat_t
-                y_hat_t = self.activation(self.base_model(x_hat))
-                if distance_metric == "kl":
-                    # kl = torch.nn.KLDivLoss(reduction='none')(torch.Tensor(np.log(y_hat_t)).to(self.device), p_y_t)
-                    if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:
-                        div = torch.sum(
-                            torch.nn.KLDivLoss(reduction="none")(torch.log(p_tm1 + eps), p_y_t + eps), -1
-                        ) - torch.sum(torch.nn.KLDivLoss(reduction="none")(torch.log(y_hat_t + eps), p_y_t + eps), -1)
-                    else:
-                        div = torch.sum(kl_multilabel(p_y_t, p_tm1), -1) - torch.sum(kl_multilabel(p_y_t, y_hat_t), -1)
-                    # print(x_hat_t[0], x[0, :, t], self.generator.forward_joint(x[:, :, :t])[0])
-                    # kl_all.append(torch.sum(kl, -1).cpu().detach().numpy())
-                    div_all.append(div.cpu().detach().numpy())
-                elif distance_metric == "mean_divergence":
-                    div = torch.abs(y_hat_t - p_y_t)
-                    div_all.append(np.mean(div.detach().cpu().numpy(), -1))
-            E_div = np.mean(np.array(div_all), axis=0)
-            if distance_metric == "kl":
-                # score[:, i, t] = 2./(1+np.exp(-1*E_div)) - 1
-                score[:, i, t] = E_div
-            elif distance_metric == "mean_divergence":
-                score[:, i, t] = 1 - E_div
-        return score
+#         for t in range(1, t_len):
+#             if not retrospective:
+#                 p_y_t = self.activation(self.base_model(x[:, :, : t + 1]))
+#             x_hat = x[:, :, 0 : t + 1].clone()
+#             div_all = []
+#             p_tm1 = self.activation(self.base_model(x[:, :, 0:t]))
+#             for _ in range(n_samples):
+#                 x_hat_t, _ = self.generator.forward_conditional(x[:, :, :t], x[:, :, t], S)
+#                 x_hat[:, :, t] = x_hat_t
+#                 y_hat_t = self.activation(self.base_model(x_hat))
+#                 if distance_metric == "kl":
+#                     # kl = torch.nn.KLDivLoss(reduction='none')(torch.Tensor(np.log(y_hat_t)).to(self.device), p_y_t)
+#                     if type(self.activation).__name__ == type(torch.nn.Softmax(-1)).__name__:  # noqa: E721
+#                         div = torch.sum(
+#                             torch.nn.KLDivLoss(reduction="none")(torch.log(p_tm1 + eps), p_y_t + eps), -1
+#                         ) - torch.sum(torch.nn.KLDivLoss(reduction="none")(torch.log(y_hat_t + eps), p_y_t + eps), -1)
+#                     else:
+#                         div = torch.sum(kl_multilabel(p_y_t, p_tm1), -1) - torch.sum(kl_multilabel(p_y_t, y_hat_t), -1)
+#                     # print(x_hat_t[0], x[0, :, t], self.generator.forward_joint(x[:, :, :t])[0])
+#                     # kl_all.append(torch.sum(kl, -1).cpu().detach().numpy())
+#                     div_all.append(div.cpu().detach().numpy())
+#                 elif distance_metric == "mean_divergence":
+#                     div = torch.abs(y_hat_t - p_y_t)
+#                     div_all.append(np.mean(div.detach().cpu().numpy(), -1))
+#             E_div = np.mean(np.array(div_all), axis=0)
+#             if distance_metric == "kl":
+#                 # score[:, i, t] = 2./(1+np.exp(-1*E_div)) - 1
+#                 score[:, i, t] = E_div
+#             elif distance_metric == "mean_divergence":
+#                 score[:, i, t] = 1 - E_div
+#         return score

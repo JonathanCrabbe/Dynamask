@@ -4,16 +4,10 @@ import torch
 import numpy as np
 import seaborn as sns
 
-sns.set()
 import pickle as pkl
 import time
 
-from matplotlib import rc, rcParams
-
-rc("font", weight="bold")
-from matplotlib import rc, rcParams
-
-rc("font", weight="bold")
+from matplotlib import rc
 
 from fit.TSX.utils import (
     load_simulated_data,
@@ -24,7 +18,7 @@ from fit.TSX.utils import (
     train_model,
     load_data,
 )
-from fit.TSX.models import StateClassifier, RETAIN, EncoderRNN, ConvClassifier, StateClassifierMIMIC
+from fit.TSX.models import StateClassifier, RETAIN, EncoderRNN, StateClassifierMIMIC
 
 from fit.TSX.generator import JointFeatureGenerator, JointDistributionGenerator
 from fit.TSX.explainers import (
@@ -36,13 +30,15 @@ from fit.TSX.explainers import (
     GradientShapExplainer,
     AFOExplainer,
     FOExplainer,
-    SHAPExplainer,
+    # SHAPExplainer,
     LIMExplainer,
     CarryForwardExplainer,
     MeanImpExplainer,
 )
 from sklearn import metrics
 
+sns.set()
+rc("font", weight="bold")
 
 intervention_list = [
     "vent",
@@ -297,7 +293,7 @@ if __name__ == "__main__":
                     )
                 elif args.data == "mimic_int":
                     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.0001)
-                    if type(activation).__name__ == type(torch.nn.Softmax(-1)).__name__:  # suresh et al
+                    if type(activation).__name__ == type(torch.nn.Softmax(-1)).__name__:  # suresh et al  # noqa: E721
                         train_model_multiclass(
                             model=model,
                             train_loader=train_loader,
@@ -439,7 +435,7 @@ if __name__ == "__main__":
                     explainer = FFCExplainer(model, generator)
 
         elif args.explainer == "shap":
-            explainer = SHAPExplainer(model, train_loader)
+            raise NotImplementedError("SHAPExplainer not implemented")
 
         elif args.explainer == "lime":
             if args.data == "mimic_int" or args.data == "simulation_spike":

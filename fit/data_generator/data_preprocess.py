@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 # import matplotlib.pyplot as plt
-from datetime import timedelta, datetime
+from datetime import timedelta
 import pickle
 from sklearn.impute import SimpleImputer
 import warnings
@@ -33,19 +33,19 @@ lab_IDs = [
 ]
 eth_list = ["white", "black", "hispanic", "asian", "other"]
 
-eth_coder = lambda eth: 0 if eth == "0" else eth_list.index(patient_data["ethnicity"].iloc[0]) + 1
+eth_coder = lambda eth: 0 if eth == "0" else eth_list.index(patient_data["ethnicity"].iloc[0]) + 1  # noqa: E731
 
 
 def quantize_signal(signal, start, step_size, n_steps, value_column, charttime_column):
     quantized_signal = []
     quantized_counts = np.zeros((n_steps,))
-    l = start
+    l = start  # noqa: E741
     u = start + timedelta(hours=step_size)
     for i in range(n_steps):
         signal_window = signal[value_column][(signal[charttime_column] > l) & (signal[charttime_column] < u)]
         quantized_signal.append(signal_window.mean())
         quantized_counts[i] = len(signal_window)
-        l = u
+        l = u  # noqa: E741
         u = l + timedelta(hours=step_size)
     return quantized_signal, quantized_counts
 
@@ -145,7 +145,7 @@ for i, id in enumerate(icu_id):
                 missing_map[i, vital_IDs.index(vital)] = 1
             else:
                 x_impute[i, :, :] = imp_mean.fit_transform(x[i, :, :].T).T
-        except:
+        except:  # noqa: E722
             pass
 
     ## Extract lab measurement informations
@@ -167,7 +167,7 @@ for i, id in enumerate(icu_id):
             nan_map[i, lab_IDs.index(lab)] = nan_count
             if nan_count == 48:
                 missing_map_lab[i, lab_IDs.index(lab)] = 1
-        except:
+        except:  # noqa: E722
             pass
 
     ## Remove a patient that is missing a measurement for the entire 48 hours
