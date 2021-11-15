@@ -1,9 +1,9 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 import torch
 
 
-class Perturbation:
+class Perturbation(ABC):
     """This class allows to create and apply perturbation on inputs based on masks.
 
     Attributes:
