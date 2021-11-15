@@ -56,7 +56,7 @@ def process_results(CV, explainers, areas):
             # For each attribution method, use the saliency map to construct a perturbed input:
             for k, explainer in enumerate(explainers):
                 if explainer == 'dynamask':
-                    with open(os.path.join(path, f'dynamask_test_importance_scores_{cv}_{int(fraction*100)}.pkl'), 'rb') as file:
+                    with open(os.path.join(path, f'dynamask_test_importance_scores_{cv}_{int(fraction*10)}.pkl'), 'rb') as file:
                         saliency = pkl.load(file)
                         if saliency.shape[1] < saliency.shape[2]:
                             saliency = saliency.transpose((0, 2, 1))
