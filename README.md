@@ -226,11 +226,19 @@ and [Rare Time](experiments/results/rare_time). To process the results and compu
 If you use this code, please cite the associated paper:
 
 ```
-@inproceedings{Crabbe2021Dynamask,
-  title={Explaining Time Series Predictions with Dynamic Masks},
-  author={Crabbé, Jonathan and van der Schaar, Mihaela},
-  year={2021},
-  booktitle={Proceedings of the 38-th International Conference on Machine Learning (ICML 2021)},
-  organization={PMLR}
+@InProceedings{pmlr-v139-crabbe21a,
+  title = 	 {Explaining Time Series Predictions with Dynamic Masks},
+  author =       {Crabb{\'e}, Jonathan and Van Der Schaar, Mihaela},
+  booktitle = 	 {Proceedings of the 38th International Conference on Machine Learning},
+  pages = 	 {2166--2177},
+  year = 	 {2021},
+  editor = 	 {Meila, Marina and Zhang, Tong},
+  volume = 	 {139},
+  series = 	 {Proceedings of Machine Learning Research},
+  month = 	 {18--24 Jul},
+  publisher =    {PMLR},
+  pdf = 	 {http://proceedings.mlr.press/v139/crabbe21a/crabbe21a.pdf},
+  url = 	 {https://proceedings.mlr.press/v139/crabbe21a.html},
+  abstract = 	 {How can we explain the predictions of a machine learning model? When the data is structured as a multivariate time series, this question induces additional difficulties such as the necessity for the explanation to embody the time dependency and the large number of inputs. To address these challenges, we propose dynamic masks (Dynamask). This method produces instance-wise importance scores for each feature at each time step by fitting a perturbation mask to the input sequence. In order to incorporate the time dependency of the data, Dynamask studies the effects of dynamic perturbation operators. In order to tackle the large number of inputs, we propose a scheme to make the feature selection parsimonious (to select no more feature than necessary) and legible (a notion that we detail by making a parallel with information theory). With synthetic and real-world data, we demonstrate that the dynamic underpinning of Dynamask, together with its parsimony, offer a neat improvement in the identification of feature importance over time. The modularity of Dynamask makes it ideal as a plug-in to increase the transparency of a wide range of machine learning models in areas such as medicine and finance, where time series are abundant.}
 }
 ```
